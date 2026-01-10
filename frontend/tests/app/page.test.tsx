@@ -23,7 +23,7 @@ describe('Home Page', () => {
         render(<Home />);
 
         // Check Header
-        expect(screen.getByText('LoL Coach Draft M0')).toBeInTheDocument();
+        expect(screen.getByText('LoL Coach Draft')).toBeInTheDocument();
 
         // Check Blue Team Roles
         const roles = ['Top', 'Jungle', 'Mid', 'Bot', 'Support'];
@@ -47,7 +47,7 @@ describe('Home Page', () => {
         render(<Home />);
 
         // Backend status should imply null or stay empty, but the page should still render
-        expect(screen.getByText('LoL Coach Draft M0')).toBeInTheDocument();
+        expect(screen.getByText('LoL Coach Draft')).toBeInTheDocument();
 
         // Check error logging
         await waitFor(() => {
