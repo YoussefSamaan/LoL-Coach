@@ -1,0 +1,16 @@
+backend:
+  port: 8000
+  checks:
+    lint: true
+    format: true
+    type_check: true
+    test: true
+  coverage_threshold: 100
+
+frontend:
+  port: 3000
+  checks:
+    lint: true
+    type_check: true
+    test: true
+  coverage_threshold: 80
