@@ -332,3 +332,6 @@ outputs/
 tmp/
 *.db
 *.sqlite
+
+# Backend Data
+backend/data/
