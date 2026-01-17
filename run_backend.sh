@@ -26,7 +26,7 @@ setup_and_test() {
     # 3. Install/Update dependencies
     echo "Installing dependencies..."
     pip install -q --upgrade pip
-    pip install -q -r requirements.txt
+    pip install -q -e '.[dev]'
 
     # 4. Read configuration from root config.yml (now that PyYAML is definitely in venv)
     local CONFIG_PATH="../config.yml"
@@ -101,7 +101,7 @@ fix_code() {
         python3 -m venv venv
     fi
     source venv/bin/activate
-    pip install -q ruff
+    pip install -q -e '.[dev]'
 
     echo "Fixing linting issues..."
     ruff check --fix . || true
