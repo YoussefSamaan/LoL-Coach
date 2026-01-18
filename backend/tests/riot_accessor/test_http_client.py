@@ -18,10 +18,9 @@ def test_riot_client_from_env(client_env_patch):
 
 def test_riot_client_missing_env(monkeypatch):
     monkeypatch.delenv("RIOT_API_KEY", raising=False)
-    # Ensure load_env doesn't re-inject something from .env file
-    with patch("app.config.env.load_env"):
-        with pytest.raises(ValueError, match="Missing RIOT_API_KEY"):
-            RiotClient.from_env()
+
+    with pytest.raises(ValueError, match="Missing RIOT_API_KEY"):
+        RiotClient.from_env()
 
 
 @patch("httpx.Client")

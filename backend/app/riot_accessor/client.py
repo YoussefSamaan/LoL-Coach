@@ -30,9 +30,8 @@ class RiotClient:
 
     @classmethod
     def from_env(cls) -> "RiotClient":
-        from app.config.env import load_env
+        from app.config.settings import settings  # noqa: F401
 
-        load_env()
         api_key = (os.getenv("RIOT_API_KEY") or "").strip()
         if not api_key:
             raise ValueError("Missing RIOT_API_KEY in environment")
@@ -53,7 +52,7 @@ class RiotClient:
                         continue
 
                     # Do not retry client errors (404 means "not found", etc).
-                    # except 429
+                    # except 429 (rate limit)
                     if 400 <= resp.status_code < 500:
                         resp.raise_for_status()
 
