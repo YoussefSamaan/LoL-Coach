@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY pyproject.toml README.md ./
 COPY app ./app
-COPY artifacts ./artifacts
+
 RUN pip install --no-cache-dir .
 
 COPY tests ./tests
