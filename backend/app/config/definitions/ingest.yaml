@@ -1,0 +1,25 @@
+# Centralized paths
+paths:
+  root_dir: "data"
+  champion_map: "data/champion_ids.json"
+
+save_by_run: true # If true, creates data/runs/<timestamp>/... structure for each run
+
+
+defaults:
+  region: "NA"
+  queue: "RANKED_SOLO_5x5"
+  match_count: 2  # As requested: "two matches" from each player
+
+sources:
+  - type: "by_rank"
+    tier: "CHALLENGER"
+    player_count: 2 # As requested: "two from each [rank]"
+
+  - type: "by_rank"
+    tier: "GRANDMASTER"
+    player_count: 2
+
+  - type: "by_rank"
+    tier: "MASTER"
+    player_count: 2
