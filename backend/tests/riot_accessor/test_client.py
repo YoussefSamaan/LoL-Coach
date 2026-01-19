@@ -67,7 +67,7 @@ def test_league_entries_by_rank_apex(client):
                 }
             ]
         }
-        
+
         results = client.league_entries_by_rank(
             region=Region.EUW, queue=QueueType.RANKED_SOLO_5x5, tier=Tier.CHALLENGER
         )
@@ -80,7 +80,7 @@ def test_league_entries_by_rank_apex(client):
         mock_gm.return_value = {
             "entries": [
                 {
-                    "summonerName": "GMPlayer", 
+                    "summonerName": "GMPlayer",
                     "tier": "GRANDMASTER",
                     "leaguePoints": 500,
                     "wins": 50,
@@ -91,7 +91,7 @@ def test_league_entries_by_rank_apex(client):
                 }
             ]
         }
-        
+
         results = client.league_entries_by_rank(
             region=Region.EUW, queue=QueueType.RANKED_SOLO_5x5, tier=Tier.GRANDMASTER
         )
@@ -104,7 +104,7 @@ def test_league_entries_by_rank_apex(client):
         mock_master.return_value = {
             "entries": [
                 {
-                    "summonerName": "MasterPlayer", 
+                    "summonerName": "MasterPlayer",
                     "tier": "MASTER",
                     "leaguePoints": 100,
                     "wins": 10,
@@ -115,7 +115,7 @@ def test_league_entries_by_rank_apex(client):
                 }
             ]
         }
-        
+
         results = client.league_entries_by_rank(
             region=Region.EUW, queue=QueueType.RANKED_SOLO_5x5, tier=Tier.MASTER
         )

@@ -16,6 +16,8 @@ defaults:
   # Optional: Filter matches older than this timestamp (Unix Epoch or ISO)
   # 0 means get everything
   min_match_time: 0
+  # Whether to fetch new champion mapping from DataDragon (default: true)
+  fetch_champion_map: true
 
 # Source Configurations (Ladder Scans)
 # The pipeline will iterate these to find players

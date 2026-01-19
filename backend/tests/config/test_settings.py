@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from app.config.settings import get_settings, Settings, IngestConfig, ScoringConfig
+from app.config.settings import get_settings, Settings, ScoringConfig
 
 
 def test_settings_singleton():
@@ -16,6 +16,7 @@ def test_test_load_ingest_yaml_paths():
     # This checks real settings logic but usually we mock environment or ensure defaults/file exists.
     # We will assume get_settings() works with real file or we mock it.
     pass
+
 
 def test_load_ingest_yaml():
     """Test loading of ingest.yaml into settings."""
@@ -49,7 +50,7 @@ def test_load_ingest_yaml():
         assert len(settings.ingest.sources) == 1
         assert settings.ingest.sources[0]["type"] == "by_rank"
         assert settings.ingest.paths.root_dir == "data_test"
-        
+
         # Test property construction
         assert settings.processed_file_path.name == "matches_test.parquet"
         assert settings.champion_map_path.name == "champs_test.json"
@@ -72,7 +73,7 @@ def test_load_ingest_yaml_exception():
     """Test failure when yaml parsing raises exception (should raise ValidationError due to missing required fields)."""
     from pydantic import ValidationError
     import pytest
-    
+
     with (
         patch("pathlib.Path.exists", return_value=True),
         patch("app.config.settings.yaml.safe_load", side_effect=Exception("YAML Error")),
@@ -140,7 +141,7 @@ def test_load_scoring_yaml_failure():
         if "scoring.yaml" in str(self):
             return False
         return False
-    
+
     def read_side_effect(self, encoding=None):
         if "ingest.yaml" in str(self):
             return ingest_yaml
@@ -184,6 +185,36 @@ def test_load_scoring_yaml_exception():
     ):
         get_settings.cache_clear()
         settings = get_settings()
-        
+
+        assert isinstance(settings.scoring, ScoringConfig)
         assert isinstance(settings.scoring, ScoringConfig)
         assert settings.scoring.role_strength_weight == 1.0
+
+
+def test_should_fetch_champion_map():
+    """Test the should_fetch_champion_map property based on defaults."""
+    from app.config.settings import IngestConfig, PathsConfig
+
+    # Mock PathsConfig
+    paths = PathsConfig(
+        root_dir="root",
+        raw_dir="raw",
+        processed_dir="proc",
+        processed_filename="name",
+        processed_file_type="pq",
+        champion_map_dir="map",
+        champion_map_filename="cmap",
+        champion_map_file_type="json",
+    )
+
+    # Case 1: Key missing (should be True by default)
+    config1 = IngestConfig(paths=paths, defaults={})
+    assert config1.should_fetch_champion_map is True
+
+    # Case 2: Explicitly True
+    config2 = IngestConfig(paths=paths, defaults={"fetch_champion_map": True})
+    assert config2.should_fetch_champion_map is True
+
+    # Case 3: Explicitly False
+    config3 = IngestConfig(paths=paths, defaults={"fetch_champion_map": False})
+    assert config3.should_fetch_champion_map is False

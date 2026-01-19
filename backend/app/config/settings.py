@@ -30,6 +30,10 @@ class IngestConfig(BaseModel):
     sources: list = Field(default_factory=list)
     save_by_run: bool = False
 
+    @property
+    def should_fetch_champion_map(self) -> bool:
+        return self.defaults.get("fetch_champion_map", True)
+
 
 class ScoringConfig(BaseModel):
     role_strength_weight: float = 1.0
@@ -48,13 +52,20 @@ class Settings(BaseModel):
 
     @property
     def champion_map_path(self) -> Path:
-        filename = f"{self.ingest.paths.champion_map_filename}.{self.ingest.paths.champion_map_file_type}"
+        filename = (
+            f"{self.ingest.paths.champion_map_filename}.{self.ingest.paths.champion_map_file_type}"
+        )
         return self.backend_root / self.ingest.paths.champion_map_dir / filename
 
     @property
     def processed_file_path(self) -> Path:
         filename = f"{self.ingest.paths.processed_filename}.{self.ingest.paths.processed_file_type}"
-        return self.backend_root / self.ingest.paths.root_dir / self.ingest.paths.processed_dir / filename
+        return (
+            self.backend_root
+            / self.ingest.paths.root_dir
+            / self.ingest.paths.processed_dir
+            / filename
+        )
 
     @property
     def data_root(self) -> Path:
