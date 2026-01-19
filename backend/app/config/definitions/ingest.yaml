@@ -1,25 +1,36 @@
-# Centralized paths
 paths:
   root_dir: "data"
-  champion_map: "data/champion_ids.json"
+  raw_dir: "raw"
+  processed_dir: "processed"
+  processed_filename: "matches"
+  processed_file_type: "parquet"
+  champion_map_dir: "data"
+  champion_map_filename: "champion_ids"
+  champion_map_file_type: "json"
 
-save_by_run: true # If true, creates data/runs/<timestamp>/... structure for each run
-
-
+# Crawler Settings
 defaults:
   region: "NA"
   queue: "RANKED_SOLO_5x5"
-  match_count: 2  # As requested: "two matches" from each player
+  matches_per_player: 2
+  # Optional: Filter matches older than this timestamp (Unix Epoch or ISO)
+  # 0 means get everything
+  min_match_time: 0
 
+# Source Configurations (Ladder Scans)
+# The pipeline will iterate these to find players
 sources:
-  - type: "by_rank"
+  - type: "ladder"
     tier: "CHALLENGER"
-    player_count: 2 # As requested: "two from each [rank]"
-
-  - type: "by_rank"
+    division: "I"
+    count: 2 # Players to fetch
+  
+  - type: "ladder"
     tier: "GRANDMASTER"
-    player_count: 2
+    division: "I"
+    count: 2
 
-  - type: "by_rank"
+  - type: "ladder"
     tier: "MASTER"
-    player_count: 2
+    division: "I"
+    count: 2
