@@ -2,6 +2,7 @@ import logging
 import sys
 from app.utils.logger import get_logger
 
+
 def test_get_logger_creation():
     logger = get_logger("test_logger")
     assert isinstance(logger, logging.Logger)
@@ -11,13 +12,15 @@ def test_get_logger_creation():
     assert isinstance(logger.handlers[0], logging.StreamHandler)
     assert logger.handlers[0].stream == sys.stdout
 
+
 def test_get_logger_singleton_behavior():
     # Calling it twice should not add multiple handlers
     logger1 = get_logger("repeat_logger")
     logger2 = get_logger("repeat_logger")
-    
+
     assert logger1 is logger2
     assert len(logger1.handlers) == 1
+
 
 def test_logger_formatter():
     logger = get_logger("formatted_logger")
