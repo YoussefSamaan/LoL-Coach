@@ -51,12 +51,10 @@ def test_league_entries_by_rank_standard(client):
 
 
 def test_league_entries_by_rank_apex(client):
-    # Function under test
-    import app.riot_accessor.client as client_mod
-
-    with patch.object(client_mod, "get_challenger_league") as mock_challenger:
+    # 1. Challenger
+    with patch("app.riot_accessor.client.get_challenger_league") as mock_challenger:
         mock_challenger.return_value = {
-            "Entries": [
+            "entries": [
                 {
                     "summonerName": "TopPlayer",
                     "leaguePoints": 1000,
@@ -69,50 +67,61 @@ def test_league_entries_by_rank_apex(client):
                 }
             ]
         }
-
+        
         results = client.league_entries_by_rank(
-            region=Region.KR, queue=QueueType.RANKED_SOLO_5x5, tier=Tier.CHALLENGER
+            region=Region.EUW, queue=QueueType.RANKED_SOLO_5x5, tier=Tier.CHALLENGER
         )
-
-        # Verify call happened
-        mock_challenger.assert_called_once()
-
         assert len(results) == 1
         assert results[0].tier == Tier.CHALLENGER
-        assert results[0].summonerName == "TopPlayer"
+        mock_challenger.assert_called_once()
 
-
-def test_league_entries_by_rank_grandmaster(client):
-    import app.riot_accessor.client as client_mod
-
-    with patch.object(client_mod, "get_grandmaster_league") as mock_gm:
-        mock_gm.return_value = {"Entries": [{"summonerName": "GMPlayer", "tier": "GRANDMASTER"}]}
-
+    # 2. Grandmaster
+    with patch("app.riot_accessor.client.get_grandmaster_league") as mock_gm:
+        mock_gm.return_value = {
+            "entries": [
+                {
+                    "summonerName": "GMPlayer", 
+                    "tier": "GRANDMASTER",
+                    "leaguePoints": 500,
+                    "wins": 50,
+                    "losses": 20,
+                    "queueType": "RANKED_SOLO_5x5",
+                    "rank": "I",
+                    "summonerId": "gm-id",
+                }
+            ]
+        }
+        
         results = client.league_entries_by_rank(
             region=Region.EUW, queue=QueueType.RANKED_SOLO_5x5, tier=Tier.GRANDMASTER
         )
-
-        mock_gm.assert_called_once()
         assert len(results) == 1
         assert results[0].tier == Tier.GRANDMASTER
+        mock_gm.assert_called_once()
 
-
-def test_league_entries_by_rank_master(client):
-    import app.riot_accessor.client as client_mod
-
-    with patch.object(client_mod, "get_master_league") as mock_master:
+    # 3. Master
+    with patch("app.riot_accessor.client.get_master_league") as mock_master:
         mock_master.return_value = {
-            # Note: client code lower-cases it now, checking normalization
-            "Entries": [{"summonerName": "MasterPlayer", "tier": "MASTER"}]
+            "entries": [
+                {
+                    "summonerName": "MasterPlayer", 
+                    "tier": "MASTER",
+                    "leaguePoints": 100,
+                    "wins": 10,
+                    "losses": 5,
+                    "queueType": "RANKED_SOLO_5x5",
+                    "rank": "I",
+                    "summonerId": "master-id",
+                }
+            ]
         }
-
+        
         results = client.league_entries_by_rank(
             region=Region.EUW, queue=QueueType.RANKED_SOLO_5x5, tier=Tier.MASTER
         )
-
-        mock_master.assert_called_once()
         assert len(results) == 1
         assert results[0].tier == Tier.MASTER
+        mock_master.assert_called_once()
 
 
 def test_league_entries_by_rank_default_division(client):
@@ -143,3 +152,26 @@ def test_client_match_methods(client):
 
         client.match_ids_by_puuid(region=Region.NA, puuid="p1")
         mock_list_match.assert_called_once()
+
+
+def test_get_summoner(client):
+    from app.riot_accessor.schemas import SummonerDTO
+
+    with patch("app.riot_accessor.client.get_summoner_by_id") as mock_get:
+        mock_get.return_value = {
+            "id": "s1",
+            "accountId": "a1",
+            "puuid": "p1",
+            "name": "Test",
+            "profileIconId": 1,
+            "revisionDate": 100,
+            "summonerLevel": 30,
+        }
+
+        dto = client.get_summoner(region=Region.NA, summoner_id="s1")
+
+        assert isinstance(dto, SummonerDTO)
+        assert dto.id == "s1"
+        assert dto.name == "Test"
+
+        mock_get.assert_called_once_with(client=client, region=Region.NA, summoner_id="s1")

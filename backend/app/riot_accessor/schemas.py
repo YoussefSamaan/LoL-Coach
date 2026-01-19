@@ -15,3 +15,13 @@ class LeagueEntry(BaseModel):
     leaguePoints: int | None = None
     wins: int | None = None
     losses: int | None = None
+
+
+class SummonerDTO(BaseModel):
+    id: str
+    accountId: str
+    puuid: str
+    name: str | None = None
+    profileIconId: int
+    revisionDate: int
+    summonerLevel: int

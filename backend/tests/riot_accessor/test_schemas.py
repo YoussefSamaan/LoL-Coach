@@ -1,5 +1,5 @@
 from app.domain.enums import Division, QueueType, Tier
-from app.riot_accessor.schemas import LeagueEntry
+from app.riot_accessor.schemas import LeagueEntry, SummonerDTO
 
 
 def test_league_entry_schema_valid():
@@ -33,3 +33,19 @@ def test_league_entry_schema_serialization():
     assert entry.queueType == QueueType.RANKED_SOLO_5x5
     assert entry.tier == Tier.CHALLENGER
     assert entry.rank == Division.I
+
+
+def test_summoner_dto_valid():
+    data = {
+        "id": "s1",
+        "accountId": "a1",
+        "puuid": "p1",
+        "name": "Test",
+        "profileIconId": 123,
+        "revisionDate": 160000000,
+        "summonerLevel": 40,
+    }
+    dto = SummonerDTO.model_validate(data)
+    assert dto.id == "s1"
+    assert dto.name == "Test"
+    assert dto.summonerLevel == 40

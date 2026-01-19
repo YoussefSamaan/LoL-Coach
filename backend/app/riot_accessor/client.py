@@ -15,7 +15,8 @@ from app.riot_accessor.endpoints.league_v4_high_elo import (
     get_master_league,
 )
 from app.riot_accessor.endpoints.match_v5 import get_match, list_match_ids_by_puuid
-from app.riot_accessor.schemas import LeagueEntry
+from app.riot_accessor.endpoints.summoner_v4 import get_summoner_by_id
+from app.riot_accessor.schemas import LeagueEntry, SummonerDTO
 
 
 @dataclass(frozen=True)
@@ -93,13 +94,13 @@ class RiotClient:
     ) -> list[LeagueEntry]:
         if tier == Tier.CHALLENGER:
             data = get_challenger_league(client=self, region=region, queue=queue)
-            entries = data.get("Entries", [])
+            entries = data.get("entries", [])
         elif tier == Tier.GRANDMASTER:
             data = get_grandmaster_league(client=self, region=region, queue=queue)
-            entries = data.get("Entries", [])
+            entries = data.get("entries", [])
         elif tier == Tier.MASTER:
             data = get_master_league(client=self, region=region, queue=queue)
-            entries = data.get("Entries", [])
+            entries = data.get("entries", [])
         else:
             # Standard tiers require division
             if not division:
@@ -118,3 +119,8 @@ class RiotClient:
             print("Entries", entries)
 
         return [LeagueEntry.model_validate(e) for e in entries]
+
+    # --- Summoner V4 ---
+    def get_summoner(self, *, region: Region, summoner_id: str) -> SummonerDTO:
+        data = get_summoner_by_id(client=self, region=region, summoner_id=summoner_id)
+        return SummonerDTO.model_validate(data)
