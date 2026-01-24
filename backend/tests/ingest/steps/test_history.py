@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, patch
 from pathlib import Path
 from app.ingest.steps.history import ScanHistoryStep
 from app.ingest.pipeline import PipelineContext
@@ -66,21 +66,15 @@ def test_scan_history_step_no_players(tmp_path, mock_settings):
     assert "match_ids" not in context.state
 
 
-def test_scan_history_step_success(
-    mock_context, mock_settings, mock_crawler, mock_get_date_str
-):
+def test_scan_history_step_success(mock_context, mock_settings, mock_crawler, mock_get_date_str):
     """Test successful history scan with new matches."""
     step = ScanHistoryStep()
     step.run(mock_context)
 
     # Verify crawler was called for each player
     assert mock_crawler.scan_match_history.call_count == 2
-    mock_crawler.scan_match_history.assert_any_call(
-        "NA", ["puuid1"], 2, start_time=0
-    )
-    mock_crawler.scan_match_history.assert_any_call(
-        "NA", ["puuid2"], 2, start_time=0
-    )
+    mock_crawler.scan_match_history.assert_any_call("NA", ["puuid1"], 2, start_time=0)
+    mock_crawler.scan_match_history.assert_any_call("NA", ["puuid2"], 2, start_time=0)
 
     # Verify match_ids were added
     assert "match_ids" in mock_context.state
@@ -100,12 +94,7 @@ def test_scan_history_step_success(
 
     # Verify manifest file was created
     manifest_file = (
-        mock_settings.data_root
-        / "manifests"
-        / "NA"
-        / "CHALLENGER"
-        / "I"
-        / "2024-01-15.txt"
+        mock_settings.data_root / "manifests" / "NA" / "CHALLENGER" / "I" / "2024-01-15.txt"
     )
     assert manifest_file.exists()
     content = manifest_file.read_text().splitlines()
@@ -139,9 +128,7 @@ def test_scan_history_step_with_min_match_time(
     step.run(mock_context)
 
     # Verify min_time was passed
-    mock_crawler.scan_match_history.assert_any_call(
-        "NA", ["puuid1"], 2, start_time=1704067200
-    )
+    mock_crawler.scan_match_history.assert_any_call("NA", ["puuid1"], 2, start_time=1704067200)
 
 
 def test_scan_history_step_crawler_exception(
@@ -183,9 +170,7 @@ def test_scan_history_step_manifest_read_exception(
         assert "match_ids" in mock_context.state
 
 
-def test_scan_history_step_deduplication_within_run(
-    mock_context, mock_settings, mock_get_date_str
-):
+def test_scan_history_step_deduplication_within_run(mock_context, mock_settings, mock_get_date_str):
     """Test that duplicates within the same run are handled."""
     with patch("app.ingest.steps.history.RiotCrawler") as MockCrawler:
         crawler_instance = Mock()
@@ -222,9 +207,7 @@ def test_scan_history_step_multiple_tiers(mock_settings, mock_get_date_str, tmp_
         step.run(context)
 
         # Should create separate manifest files for each tier
-        challenger_manifest = (
-            tmp_path / "manifests" / "NA" / "CHALLENGER" / "I" / "2024-01-15.txt"
-        )
+        challenger_manifest = tmp_path / "manifests" / "NA" / "CHALLENGER" / "I" / "2024-01-15.txt"
         grandmaster_manifest = (
             tmp_path / "manifests" / "NA" / "GRANDMASTER" / "I" / "2024-01-15.txt"
         )
@@ -257,9 +240,7 @@ def test_scan_history_step_manifest_caching(
     assert "NA1_old_match" in cached_manifest
 
 
-def test_scan_history_step_empty_history(
-    mock_context, mock_settings, mock_get_date_str
-):
+def test_scan_history_step_empty_history(mock_context, mock_settings, mock_get_date_str):
     """Test when crawler returns no matches."""
     with patch("app.ingest.steps.history.RiotCrawler") as MockCrawler:
         crawler_instance = Mock()

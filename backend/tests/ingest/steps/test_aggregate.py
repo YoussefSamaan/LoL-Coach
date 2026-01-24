@@ -1,7 +1,6 @@
 import pytest
 import json
-import pandas as pd
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from pathlib import Path
 from app.ingest.steps.aggregate import AggregateStatsStep
 from app.ingest.pipeline import PipelineContext
@@ -36,14 +35,18 @@ def sample_parsed_data():
             "tier": "CHALLENGER",
             "division": "I",
             "day": "2024-01-01",
-            "blue_team": json.dumps([
-                {"champion": "Annie", "role": "MIDDLE"},
-                {"champion": "Olaf", "role": "JUNGLE"},
-            ]),
-            "red_team": json.dumps([
-                {"champion": "Darius", "role": "TOP"},
-                {"champion": "Jinx", "role": "BOTTOM"},
-            ]),
+            "blue_team": json.dumps(
+                [
+                    {"champion": "Annie", "role": "MIDDLE"},
+                    {"champion": "Olaf", "role": "JUNGLE"},
+                ]
+            ),
+            "red_team": json.dumps(
+                [
+                    {"champion": "Darius", "role": "TOP"},
+                    {"champion": "Jinx", "role": "BOTTOM"},
+                ]
+            ),
             "winner": "blue",
         }
     ]
@@ -73,7 +76,7 @@ def test_aggregate_stats_step_name():
 def test_aggregate_stats_step_no_parsed_dir(tmp_path, mock_settings):
     """Test when no parsed_dir is in context and default doesn't exist."""
     context = PipelineContext(run_id="test_run", base_dir=tmp_path)
-    
+
     step = AggregateStatsStep()
     step.run(context)
 
@@ -163,7 +166,7 @@ def test_aggregate_stats_step_missing_required_columns(
     """Test handling of data missing required columns."""
     # Create data without required columns
     incomplete_data = [{"match_id": "NA1_1", "winner": "blue"}]
-    
+
     file_path = mock_context.state["parsed_dir"] / "incomplete.json"
     file_path.write_text(json.dumps(incomplete_data))
 
@@ -207,7 +210,7 @@ def test_aggregate_stats_step_groupby_multiple_groups(
             "winner": "blue",
         },
     ]
-    
+
     file_path = mock_context.state["parsed_dir"] / "multi_group.json"
     file_path.write_text(json.dumps(data))
 
@@ -262,7 +265,7 @@ def test_aggregate_stats_step_json_no_indent(
 
     output_file = mock_settings.aggregates_root / "NA" / "CHALLENGER" / "I" / "2024-01-01.json"
     content = output_file.read_text()
-    
+
     # Should not have indentation (indent=None)
     assert "\n  " not in content
 
@@ -271,7 +274,7 @@ def test_aggregate_stats_step_uses_default_parsed_root(tmp_path, mock_settings):
     """Test using default parsed_root when not in context."""
     context = PipelineContext(run_id="test_run", base_dir=tmp_path)
     # Don't set parsed_dir in context
-    
+
     # Create file in default location
     mock_settings.parsed_root.mkdir(parents=True, exist_ok=True)
     file_path = mock_settings.parsed_root / "data.json"
@@ -288,13 +291,7 @@ def test_aggregate_stats_step_recursive_glob(
 ):
     """Test that files are found recursively."""
     # Create nested directory structure
-    nested_file = (
-        mock_context.state["parsed_dir"]
-        / "level1"
-        / "level2"
-        / "level3"
-        / "data.json"
-    )
+    nested_file = mock_context.state["parsed_dir"] / "level1" / "level2" / "level3" / "data.json"
     nested_file.parent.mkdir(parents=True, exist_ok=True)
     nested_file.write_text(json.dumps(sample_parsed_data))
 

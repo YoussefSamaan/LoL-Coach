@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock, patch
-from pathlib import Path
 from app.ingest.steps.static import FetchStaticDataStep
 from app.ingest.pipeline import PipelineContext
 
@@ -46,9 +45,7 @@ def test_fetch_static_data_step_fetch_enabled_file_not_exists(
     assert mock_settings.champion_map_path.parent.exists()
 
     # Verify client was created and save_champion_map was called
-    mock_ddragon_client.save_champion_map.assert_called_once_with(
-        mock_settings.champion_map_path
-    )
+    mock_ddragon_client.save_champion_map.assert_called_once_with(mock_settings.champion_map_path)
 
     # Verify champion_map_path was added to context
     assert mock_context.state["champion_map_path"] == mock_settings.champion_map_path
@@ -66,9 +63,7 @@ def test_fetch_static_data_step_fetch_enabled_file_exists(
     step.run(mock_context)
 
     # Should still call save_champion_map (overwrites existing)
-    mock_ddragon_client.save_champion_map.assert_called_once_with(
-        mock_settings.champion_map_path
-    )
+    mock_ddragon_client.save_champion_map.assert_called_once_with(mock_settings.champion_map_path)
 
     assert mock_context.state["champion_map_path"] == mock_settings.champion_map_path
 
@@ -115,7 +110,7 @@ def test_fetch_static_data_step_creates_parent_directory(
         mock_settings.ingest.should_fetch_champion_map = True
         # Use nested path so parent doesn't exist
         mock_settings.champion_map_path = tmp_path / "data" / "champion_map.json"
-        
+
         # Ensure parent doesn't exist
         assert not mock_settings.champion_map_path.parent.exists()
 

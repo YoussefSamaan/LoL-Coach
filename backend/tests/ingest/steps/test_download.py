@@ -1,7 +1,6 @@
 import pytest
 import json
 from unittest.mock import Mock, patch
-from datetime import datetime, timezone
 from app.ingest.steps.download import DownloadContentStep
 from app.ingest.pipeline import PipelineContext
 from app.domain.enums import Region
@@ -84,6 +83,7 @@ def test_download_content_step_success(mock_context, mock_settings, mock_crawler
     match2_file = base_raw_dir / "NA" / "GRANDMASTER" / "II" / "2024-01-01" / "NA1_match2.json"
 
     assert match1_file.exists()
+    assert match2_file.exists()
     # Verify JSON content
     data = json.loads(match1_file.read_text())
     assert data["metadata"]["matchId"] == "NA1_match1"
@@ -92,9 +92,7 @@ def test_download_content_step_success(mock_context, mock_settings, mock_crawler
     assert mock_context.state["raw_dir"] == base_raw_dir
 
 
-def test_download_content_step_with_min_time_filter(
-    mock_context, mock_settings, mock_crawler
-):
+def test_download_content_step_with_min_time_filter(mock_context, mock_settings, mock_crawler):
     """Test that matches before min_time are filtered out."""
     mock_context.state["min_match_time"] = 1704153600  # 2024-01-02 00:00:00 UTC
 
@@ -108,9 +106,7 @@ def test_download_content_step_with_min_time_filter(
     assert len(match_files) == 0
 
 
-def test_download_content_step_with_min_time_pass(
-    mock_context, mock_settings, mock_crawler
-):
+def test_download_content_step_with_min_time_pass(mock_context, mock_settings, mock_crawler):
     """Test that matches after min_time are kept."""
     mock_context.state["min_match_time"] = 1704000000  # Before match time
 
@@ -123,9 +119,7 @@ def test_download_content_step_with_min_time_pass(
     assert len(match_files) == 2
 
 
-def test_download_content_step_crawler_returns_none(
-    mock_context, mock_settings, mock_crawler
-):
+def test_download_content_step_crawler_returns_none(mock_context, mock_settings, mock_crawler):
     """Test when crawler returns None for a match."""
     mock_crawler.get_match.side_effect = [None, {"info": {"gameCreation": 1704067200000}}]
 
@@ -138,9 +132,7 @@ def test_download_content_step_crawler_returns_none(
     assert len(match_files) == 1
 
 
-def test_download_content_step_crawler_exception(
-    mock_context, mock_settings, mock_crawler
-):
+def test_download_content_step_crawler_exception(mock_context, mock_settings, mock_crawler):
     """Test handling of crawler exceptions."""
     mock_crawler.get_match.side_effect = [
         Exception("API Error"),
@@ -164,9 +156,7 @@ def test_download_content_step_unknown_region(mock_settings, mock_crawler, tmp_p
         "UNKNOWN_match1": {"region": "UNKNOWN", "tier": "CHALLENGER", "division": "I"}
     }
 
-    mock_crawler.get_match.return_value = {
-        "info": {"gameCreation": 1704067200000}
-    }
+    mock_crawler.get_match.return_value = {"info": {"gameCreation": 1704067200000}}
 
     step = DownloadContentStep()
     step.run(context)
@@ -175,17 +165,13 @@ def test_download_content_step_unknown_region(mock_settings, mock_crawler, tmp_p
     mock_crawler.get_match.assert_called_once_with("UNKNOWN_match1", Region.NA)
 
 
-def test_download_content_step_missing_rank_context(
-    mock_settings, mock_crawler, tmp_path
-):
+def test_download_content_step_missing_rank_context(mock_settings, mock_crawler, tmp_path):
     """Test handling of matches without rank context."""
     context = PipelineContext(run_id="test_run", base_dir=tmp_path)
     context.state["match_ids"] = {"NA1_match1"}
     context.state["match_rank_map"] = {}  # Empty map
 
-    mock_crawler.get_match.return_value = {
-        "info": {"gameCreation": 1704067200000}
-    }
+    mock_crawler.get_match.return_value = {"info": {"gameCreation": 1704067200000}}
 
     step = DownloadContentStep()
     step.run(context)
@@ -209,9 +195,7 @@ def test_download_content_step_creates_nested_directories(
     assert (base_raw_dir / "NA" / "GRANDMASTER" / "II" / "2024-01-01").exists()
 
 
-def test_download_content_step_json_formatting(
-    mock_context, mock_settings, mock_crawler
-):
+def test_download_content_step_json_formatting(mock_context, mock_settings, mock_crawler):
     """Test that JSON is written without indentation."""
     mock_crawler.get_match.return_value = {
         "metadata": {"matchId": "NA1_match1"},
@@ -241,9 +225,7 @@ def test_download_content_step_date_extraction(mock_settings, mock_crawler, tmp_
     }
 
     # Different timestamp: 2024-06-15 12:30:00 UTC
-    mock_crawler.get_match.return_value = {
-        "info": {"gameCreation": 1718454600000}
-    }
+    mock_crawler.get_match.return_value = {"info": {"gameCreation": 1718454600000}}
 
     step = DownloadContentStep()
     step.run(context)
@@ -253,9 +235,7 @@ def test_download_content_step_date_extraction(mock_settings, mock_crawler, tmp_
     assert match_file.exists()
 
 
-def test_download_content_step_no_min_time_in_context(
-    mock_settings, mock_crawler, tmp_path
-):
+def test_download_content_step_no_min_time_in_context(mock_settings, mock_crawler, tmp_path):
     """Test when min_match_time is not in context (defaults to 0)."""
     context = PipelineContext(run_id="test_run", base_dir=tmp_path)
     context.state["match_ids"] = {"NA1_match1"}
@@ -263,9 +243,7 @@ def test_download_content_step_no_min_time_in_context(
         "NA1_match1": {"region": "NA", "tier": "CHALLENGER", "division": "I"}
     }
 
-    mock_crawler.get_match.return_value = {
-        "info": {"gameCreation": 1704067200000}
-    }
+    mock_crawler.get_match.return_value = {"info": {"gameCreation": 1704067200000}}
 
     step = DownloadContentStep()
     step.run(context)
@@ -276,9 +254,7 @@ def test_download_content_step_no_min_time_in_context(
     assert len(match_files) == 1
 
 
-def test_download_content_step_region_enum_conversion(
-    mock_settings, mock_crawler, tmp_path
-):
+def test_download_content_step_region_enum_conversion(mock_settings, mock_crawler, tmp_path):
     """Test that region string is properly converted to Region enum."""
     context = PipelineContext(run_id="test_run", base_dir=tmp_path)
     context.state["match_ids"] = {"EUW1_match1"}
@@ -286,9 +262,7 @@ def test_download_content_step_region_enum_conversion(
         "EUW1_match1": {"region": "EUW", "tier": "CHALLENGER", "division": "I"}
     }
 
-    mock_crawler.get_match.return_value = {
-        "info": {"gameCreation": 1704067200000}
-    }
+    mock_crawler.get_match.return_value = {"info": {"gameCreation": 1704067200000}}
 
     step = DownloadContentStep()
     step.run(context)
