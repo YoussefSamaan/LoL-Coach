@@ -10,7 +10,8 @@ from app.ingest.steps import (
     ScanLadderStep,
     ScanHistoryStep,
     DownloadContentStep,
-    ProcessDataStep,
+    ParseMatchStep,
+    AggregateStatsStep,
     CleanupStep,
 )
 
@@ -55,7 +56,8 @@ def main() -> int:
     pipeline.add_step(ScanLadderStep())
     pipeline.add_step(ScanHistoryStep())
     pipeline.add_step(DownloadContentStep())
-    pipeline.add_step(ProcessDataStep())
+    pipeline.add_step(ParseMatchStep())
+    pipeline.add_step(AggregateStatsStep())
 
     if args.cleanup_raw:
         pipeline.add_step(CleanupStep(target_key="raw_dir"))
