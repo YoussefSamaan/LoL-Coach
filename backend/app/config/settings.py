@@ -17,11 +17,14 @@ class PathsConfig(BaseModel):
     root_dir: str
     raw_dir: str
     processed_dir: str
+    parsed_dir: str = "parsed"
+    aggregates_dir: str = "aggregates"
     processed_filename: str
-    processed_file_type: str
+    processed_file_type: str = "json"
     champion_map_dir: str
     champion_map_filename: str
     champion_map_file_type: str
+    manifest_dir: str = "manifests"
 
 
 class IngestConfig(BaseModel):
@@ -32,23 +35,25 @@ class IngestConfig(BaseModel):
 
     @property
     def should_fetch_champion_map(self) -> bool:
-        return self.defaults.get("fetch_champion_map", True)
+        return self.defaults.get("fetch_champion_map", False)
 
 
-class ScoringConfig(BaseModel):
-    role_strength_weight: float = 1.0
-    synergy_weight: float = 0.5
-    counter_weight: float = 0.5
-    off_role_penalty: float = 0.0
+class MLConfig(BaseModel):
+    artifacts_dir: str = "artifacts"
+    model_name: str = "draft_model"
 
 
 class Settings(BaseModel):
     ingest: IngestConfig
-    scoring: ScoringConfig
+    ml: MLConfig = Field(default_factory=MLConfig)
 
     @property
     def backend_root(self) -> Path:
         return BASE_DIR
+
+    @property
+    def artifacts_path(self) -> Path:
+        return self.backend_root / self.ml.artifacts_dir / self.ml.model_name
 
     @property
     def champion_map_path(self) -> Path:
@@ -56,6 +61,10 @@ class Settings(BaseModel):
             f"{self.ingest.paths.champion_map_filename}.{self.ingest.paths.champion_map_file_type}"
         )
         return self.backend_root / self.ingest.paths.champion_map_dir / filename
+
+    @property
+    def manifests_root(self) -> Path:
+        return self.backend_root / self.ingest.paths.root_dir / self.ingest.paths.manifest_dir
 
     @property
     def processed_file_path(self) -> Path:
@@ -71,12 +80,23 @@ class Settings(BaseModel):
     def data_root(self) -> Path:
         return self.backend_root / self.ingest.paths.root_dir
 
+    @property
+    def raw_root(self) -> Path:
+        return self.data_root / self.ingest.paths.raw_dir
+
+    @property
+    def parsed_root(self) -> Path:
+        return self.data_root / self.ingest.paths.parsed_dir
+
+    @property
+    def aggregates_root(self) -> Path:
+        return self.data_root / self.ingest.paths.aggregates_dir
+
 
 @lru_cache
 def get_settings() -> Settings:
     config_dir = Path(__file__).resolve().parent
     ingest_path = config_dir / "definitions" / "ingest.yaml"
-    scoring_path = config_dir / "definitions" / "scoring.yaml"
 
     ingest_data: dict[str, Any] = {}
     if ingest_path.exists():
@@ -85,16 +105,9 @@ def get_settings() -> Settings:
         except Exception as e:
             print(f"Warning: Failed to load ingest.yaml: {e}")
 
-    scoring_data: dict[str, Any] = {}
-    if scoring_path.exists():
-        try:
-            scoring_data = yaml.safe_load(scoring_path.read_text(encoding="utf-8")) or {}
-        except Exception as e:
-            print(f"Warning: Failed to load scoring.yaml: {e}")
-
     return Settings(
         ingest=IngestConfig(**ingest_data),
-        scoring=ScoringConfig(**scoring_data),
+        # ml config uses defaults for now
     )
 
 

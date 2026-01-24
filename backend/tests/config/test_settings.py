@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from app.config.settings import get_settings, Settings, ScoringConfig
+from app.config.settings import get_settings, Settings
 
 
 def test_settings_singleton():
@@ -9,13 +9,6 @@ def test_settings_singleton():
     s2 = get_settings()
     assert isinstance(s1, Settings)
     assert s1 is s2
-
-
-def test_test_load_ingest_yaml_paths():
-    """Verify strictly calculated paths."""
-    # This checks real settings logic but usually we mock environment or ensure defaults/file exists.
-    # We will assume get_settings() works with real file or we mock it.
-    pass
 
 
 def test_load_ingest_yaml():
@@ -55,6 +48,11 @@ def test_load_ingest_yaml():
         assert settings.processed_file_path.name == "matches_test.parquet"
         assert settings.champion_map_path.name == "champs_test.json"
         assert settings.data_root.name == "data_test"
+        assert settings.artifacts_path.name == "draft_model"
+        assert settings.manifests_root.name == "manifests"
+        assert settings.raw_root.name == "raw_test"
+        assert settings.parsed_root.name == "parsed"
+        assert settings.aggregates_root.name == "aggregates"
 
 
 def test_load_ingest_yaml_failure():
@@ -83,114 +81,6 @@ def test_load_ingest_yaml_exception():
             get_settings()
 
 
-def test_load_scoring_yaml():
-    """Test loading of scoring.yaml into settings."""
-    ingest_yaml = """
-    paths:
-      root_dir: "data"
-      raw_dir: "raw"
-      processed_dir: "processed"
-      processed_filename: "matches"
-      processed_file_type: "parquet"
-      champion_map_dir: "data"
-      champion_map_filename: "champion_ids"
-      champion_map_file_type: "json"
-    """
-    scoring_yaml = """
-    role_strength_weight: 0.8
-    synergy_weight: 0.1
-    """
-
-    def side_effect(self, encoding=None):
-        if "ingest.yaml" in str(self):
-            return ingest_yaml
-        if "scoring.yaml" in str(self):
-            return scoring_yaml
-        return ""
-
-    with (
-        patch("pathlib.Path.exists", return_value=True),
-        patch("pathlib.Path.read_text", side_effect=side_effect, autospec=True),
-    ):
-        get_settings.cache_clear()
-        settings = get_settings()
-
-        assert settings.scoring.role_strength_weight == 0.8
-        assert settings.scoring.synergy_weight == 0.1
-        # Verify defaults for missing fields
-        assert settings.scoring.counter_weight == 0.5
-
-
-def test_load_scoring_yaml_failure():
-    """Test graceful failure when scoring yaml is invalid or missing."""
-    ingest_yaml = """
-    paths:
-      root_dir: "data"
-      raw_dir: "raw"
-      processed_dir: "processed"
-      processed_filename: "matches"
-      processed_file_type: "parquet"
-      champion_map_dir: "data"
-      champion_map_filename: "champion_ids"
-      champion_map_file_type: "json"
-    """
-
-    def exists_side_effect(self):
-        if "ingest.yaml" in str(self):
-            return True
-        if "scoring.yaml" in str(self):
-            return False
-        return False
-
-    def read_side_effect(self, encoding=None):
-        if "ingest.yaml" in str(self):
-            return ingest_yaml
-        return ""
-
-    with (
-        patch("pathlib.Path.exists", side_effect=exists_side_effect, autospec=True),
-        patch("pathlib.Path.read_text", side_effect=read_side_effect, autospec=True),
-    ):
-        get_settings.cache_clear()
-        settings = get_settings()
-        # Should rely on defaults for scoring
-        assert isinstance(settings.scoring, ScoringConfig)
-        assert settings.scoring.role_strength_weight == 1.0
-
-
-def test_load_scoring_yaml_exception():
-    """Test graceful failure when scoring yaml parsing raises exception."""
-    ingest_yaml = """
-    paths:
-      root_dir: "data"
-      raw_dir: "raw"
-      processed_dir: "processed"
-      processed_filename: "matches"
-      processed_file_type: "parquet"
-      champion_map_dir: "data"
-      champion_map_filename: "champion_ids"
-      champion_map_file_type: "json"
-    """
-
-    def read_side_effect(self, encoding=None):
-        if "ingest.yaml" in str(self):
-            return ingest_yaml
-        if "scoring.yaml" in str(self):
-            raise Exception("YAML Error")
-        return ""
-
-    with (
-        patch("pathlib.Path.exists", return_value=True),
-        patch("pathlib.Path.read_text", side_effect=read_side_effect, autospec=True),
-    ):
-        get_settings.cache_clear()
-        settings = get_settings()
-
-        assert isinstance(settings.scoring, ScoringConfig)
-        assert isinstance(settings.scoring, ScoringConfig)
-        assert settings.scoring.role_strength_weight == 1.0
-
-
 def test_should_fetch_champion_map():
     """Test the should_fetch_champion_map property based on defaults."""
     from app.config.settings import IngestConfig, PathsConfig
@@ -207,9 +97,9 @@ def test_should_fetch_champion_map():
         champion_map_file_type="json",
     )
 
-    # Case 1: Key missing (should be True by default)
+    # Case 1: Key missing (should be False by default as per settings.py)
     config1 = IngestConfig(paths=paths, defaults={})
-    assert config1.should_fetch_champion_map is True
+    assert config1.should_fetch_champion_map is False
 
     # Case 2: Explicitly True
     config2 = IngestConfig(paths=paths, defaults={"fetch_champion_map": True})

@@ -2,8 +2,11 @@ paths:
   root_dir: "data"
   raw_dir: "raw"
   processed_dir: "processed"
+  parsed_dir: "parsed"
+  aggregates_dir: "aggregates"
+  manifest_dir: "manifests"
   processed_filename: "matches"
-  processed_file_type: "parquet"
+  processed_file_type: "json"
   champion_map_dir: "data"
   champion_map_filename: "champion_ids"
   champion_map_file_type: "json"
@@ -12,7 +15,8 @@ paths:
 defaults:
   region: "NA"
   queue: "RANKED_SOLO_5x5"
-  matches_per_player: 2
+  # Fetch 40 matches per player to get recent history without going too far back
+  matches_per_player: 40
   # Optional: Filter matches older than this timestamp (Unix Epoch or ISO)
   # 0 means get everything
   min_match_time: 0
@@ -20,19 +24,19 @@ defaults:
   fetch_champion_map: true
 
 # Source Configurations (Ladder Scans)
-# The pipeline will iterate these to find players
+# Total target: ~300 players * 40 matches = 12,000 matches
 sources:
   - type: "ladder"
     tier: "CHALLENGER"
     division: "I"
-    count: 2 # Players to fetch
+    count: 100 # Top 100 Challenger players
   
   - type: "ladder"
     tier: "GRANDMASTER"
     division: "I"
-    count: 2
+    count: 100 # Top 100 GM players
 
   - type: "ladder"
     tier: "MASTER"
     division: "I"
-    count: 2
+    count: 100 # Top 100 Master players
