@@ -63,7 +63,7 @@ def parse_match_row(match_data: dict, id_map: dict, rank_ctx: dict) -> dict | No
 
         # Skip invalid roles/champs
         if not champ or pos not in RIOT_ROLE_TO_DOMAIN:
-            logger.warning(f"Invalid role/champ: {champ} {pos}")
+            logger.warning(f"Match id: [{match_id}] Invalid role/champ: {champ} ({pos})")
             continue
 
         entry = {"c": champ, "r": RIOT_ROLE_TO_DOMAIN[pos].lower()}
@@ -76,7 +76,13 @@ def parse_match_row(match_data: dict, id_map: dict, rank_ctx: dict) -> dict | No
             red_team.append(entry)
 
     if len(blue_team) != 5 or len(red_team) != 5:
-        logger.warning(f"Invalid team: {blue_team} {red_team}")
+        duration = info.get("gameDuration", 0)
+        logger.warning(
+            f"Match id: [{match_id}] Invalid team size (Duration: {duration}s): \n"
+            f"Blue={len(blue_team)}, Red={len(red_team)}\n"
+            f"Blue Team: {blue_team}\n"
+            f"Red Team: {red_team}"
+        )
         return None
 
     # Bans
@@ -87,11 +93,15 @@ def parse_match_row(match_data: dict, id_map: dict, rank_ctx: dict) -> dict | No
         target = blue_bans if is_blue else red_bans
         for ban in team.get("bans", []):
             cid = str(ban.get("championId"))
+            # " -1" often signifies no ban in Riot API
+            if cid == "-1":
+                continue
+                
             cname = id_map.get(cid)
             if cname:
                 target.append(cname)
             else:
-                logger.warning(f"Invalid ban: {cid}")
+                logger.warning(f"Match id: [{match_id}] Invalid ban: {cid}")
 
     return {
         "match_id": match_id,
