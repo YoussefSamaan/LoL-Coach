@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { DraftCenter } from '@/components/draft/DraftCenter';
 import { Role } from '@/types';
 import { describe, it, expect, vi } from 'vitest';
@@ -29,8 +29,8 @@ describe('DraftCenter', () => {
 
     it('renders recommendations', () => {
         const recs = [
-            { championId: '1', championName: 'Lee Sin', score: 90, reasons: { synergy: [], counters: [], roleStrength: '' } },
-            { championId: '2', championName: 'Elise', score: 85, reasons: { synergy: [], counters: [], roleStrength: '' } },
+            { championId: '1', championName: 'Lee Sin', score: 90, primaryReason: 'High Winrate' },
+            { championId: '2', championName: 'Elise', score: 85, primaryReason: 'Counter Pick' },
         ];
         render(<DraftCenter {...mockProps} recommendations={recs} />);
 

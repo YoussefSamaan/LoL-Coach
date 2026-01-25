@@ -58,7 +58,14 @@ export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<R
             // Backend returns: 
             // recommendations: [{ champion: string, score: float, reasons: string[], ... }]
 
-            const mappedRecs: Recommendation[] = data.recommendations.map((r: any) => {
+            interface BackendRecommendation {
+                champion: string;
+                score: number;
+                reasons?: string[];
+                explanation?: string;
+            }
+
+            const mappedRecs: Recommendation[] = data.recommendations.map((r: BackendRecommendation) => {
                 const championInfo = championList.find(c => c.id === r.champion);
                 return {
                     championId: r.champion,

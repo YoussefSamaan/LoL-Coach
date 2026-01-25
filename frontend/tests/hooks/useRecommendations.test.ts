@@ -1,7 +1,7 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useRecommendations } from '@/hooks/useRecommendations';
 import { Role } from '@/types';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Define Fetch Mock
 const mockFetch = vi.fn();
@@ -65,7 +65,7 @@ describe('useRecommendations', () => {
     it('clears filled role before predicting', async () => {
         const draftWithFilledRole = {
             ...defaultDraft,
-            allies: ['Garen' as any, null, null, null, null], // Top is filled
+            allies: ['Garen', null, null, null, null], // Top is filled
             targetRole: Role.TOP
         };
 

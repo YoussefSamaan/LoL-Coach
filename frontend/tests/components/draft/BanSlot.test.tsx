@@ -16,7 +16,7 @@ describe('BanSlot', () => {
 
     it('renders champion correctly', () => {
         render(<BanSlot champion={mockChamp} onClick={mockClick} side="red" index={1} />);
-        const slot = screen.getByTestId('ban-slot-red-1');
+        screen.getByTestId('ban-slot-red-1');
 
         // Image should be present
         const img = screen.getByRole('img', { name: 'Ahri' });

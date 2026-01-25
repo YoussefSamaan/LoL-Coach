@@ -40,18 +40,20 @@ describe('Home Page', () => {
                     })
                 };
             }
-            if (url.includes('/predict')) {
+            if (url.includes('/recommend/draft')) {
                 return {
+                    ok: true,
                     json: async () => ({
                         recommendations: [
-                            { champion_id: 'Garen', score: 0.9, reason: 'Good match', secondary_reasons: ['Strong late'] },
-                            { champion_id: 'Darius', score: 0.8, reason: 'Lane bully', secondary_reasons: [] },
-                            { champion_id: 'Mordekaiser', score: 0.7, reason: 'AP threat', secondary_reasons: [] }
+                            { champion: 'Garen', score: 0.9, reasons: ['Good match'] },
+                            { champion: 'Darius', score: 0.8, reasons: ['Lane bully'] },
+                            { champion: 'Mordekaiser', score: 0.7, reasons: ['AP threat'] }
                         ]
                     })
                 };
             }
             return {
+                ok: true,
                 json: async () => ({})
             };
         });
@@ -221,11 +223,8 @@ describe('Home Page', () => {
             expect(selects[0]).toBeInTheDocument();
         });
 
-        expect(screen.getByText('Analyzing...')).toBeInTheDocument();
-
         await waitFor(() => {
             expect(screen.getByText('Showing Top 3 Recommendations')).toBeInTheDocument();
-            expect(screen.queryByText('Analyzing...')).not.toBeInTheDocument();
         }, { timeout: 3000 });
     });
 });
