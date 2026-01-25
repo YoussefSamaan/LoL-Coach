@@ -1,4 +1,5 @@
 backend:
+  host: http://localhost
   port: 8000
   checks:
     lint: true
