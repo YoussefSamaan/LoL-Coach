@@ -335,3 +335,4 @@ tmp/
 
 # Backend Data
 backend/data/
+backend/artifacts/

@@ -5,8 +5,9 @@ import { DraftState } from './useDraft';
 export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<React.SetStateAction<DraftState>>, championList: Champion[]) => {
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handlePredict = useCallback(() => {
+    const handlePredict = useCallback(async () => {
         // 2. Check if target role is already filled
         const roleIndex = [Role.TOP, Role.JUNGLE, Role.MID, Role.ADC, Role.SUPPORT].indexOf(draft.targetRole);
         const isRoleFilled = draft.allies[roleIndex] !== null;
@@ -23,38 +24,61 @@ export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<R
             });
         }
 
-        // 1. Construct Payload (using potentially updated allies)
-        const myTeam = currentAllies;
-        const enemyTeam = draft.enemies;
-        const bans = [...draft.allyBans, ...draft.enemyBans];
-        const payload = {
-            myTeam,
-            enemyTeam,
-            bans,
-            targetRole: draft.targetRole
-        };
-
-        console.log("Sending to Backend:", payload);
+        const cleanAllies = currentAllies.filter((c): c is string => !!c);
+        const cleanEnemies = draft.enemies.filter((c): c is string => !!c);
+        const cleanBans = [...draft.allyBans, ...draft.enemyBans].filter((c): c is string => !!c);
 
         setLoading(true);
+        setError(null);
 
-        // Mock Backend Delay
-        setTimeout(() => {
-            // Filter candidates
-            const taken = new Set([...currentAllies, ...draft.enemies, ...draft.allyBans, ...draft.enemyBans].filter(Boolean));
-            const candidates = championList.filter(c => !taken.has(c.id));
+        try {
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+            const response = await fetch(`${backendUrl}/v1/recommend/draft`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    role: draft.targetRole,
+                    allies: cleanAllies,
+                    enemies: cleanEnemies,
+                    bans: cleanBans,
+                    top_k: 10
+                })
+            });
 
-            const recs: Recommendation[] = candidates.slice(0, 8).map(c => ({
-                championId: c.id,
-                championName: c.name,
-                score: Math.floor(Math.random() * 30) + 70,
-                primaryReason: 'Great synergy with team composition'
-            })).sort((a, b) => b.score - a.score);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to fetch recommendations: ${errorText}`);
+            }
 
-            setRecommendations(recs);
+            const data = await response.json();
+
+            // Map backend response to Recommendation type
+            // Backend returns: 
+            // recommendations: [{ champion: string, score: float, reasons: string[], ... }]
+
+            const mappedRecs: Recommendation[] = data.recommendations.map((r: any) => {
+                const championInfo = championList.find(c => c.id === r.champion);
+                return {
+                    championId: r.champion,
+                    championName: championInfo ? championInfo.name : r.champion,
+                    // Score is probability 0-1, Convert to 0-100 integer for UI
+                    score: Math.round(r.score * 100),
+                    primaryReason: r.reasons && r.reasons.length > 0 ? r.reasons[0] : 'Recommended based on draft state'
+                };
+            });
+
+            setRecommendations(mappedRecs);
+
+        } catch (err) {
+            console.error("Prediction Error:", err);
+            setError('Failed to get recommendations');
+        } finally {
             setLoading(false);
-        }, 500);
+        }
     }, [draft, championList, setDraft]);
 
-    return { recommendations, loading, handlePredict };
+    // Return error as well, though existing components might not consume it yet
+    return { recommendations, loading, error, handlePredict };
 };
