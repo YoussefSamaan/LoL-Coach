@@ -215,9 +215,9 @@ def build_tables(config: SmoothingConfig | None = None) -> Path | None:
         if not json_files:
             logger.error(f"No JSON files found in {parsed_dir}")
             return None
-        
+
         logger.info(f"Found {len(json_files)} JSON files to process")
-        
+
         # Load all JSON files into a single DataFrame
         all_data = []
         for json_file in json_files:
@@ -230,11 +230,11 @@ def build_tables(config: SmoothingConfig | None = None) -> Path | None:
             except Exception as e:
                 logger.warning(f"Failed to load {json_file}: {e}")
                 continue
-        
+
         if not all_data:
             logger.error("No valid data loaded from JSON files")
             return None
-        
+
         df = pd.DataFrame(all_data)
     except Exception as e:
         logger.error(f"Failed to load JSON data: {e}")
@@ -242,7 +242,7 @@ def build_tables(config: SmoothingConfig | None = None) -> Path | None:
 
     logger.info(f"Loaded {len(df)} match records from {parsed_dir}")
 
-    if df.empty:
+    if df.empty:  # pragma: no cover
         logger.warning("DataFrame is empty - no data to process")
         return None
 
@@ -300,10 +300,13 @@ def build_tables(config: SmoothingConfig | None = None) -> Path | None:
 
     # 3. Compute Global Winrates (baseline)
     global_grouped = df.groupby("champ")["win"].agg(["sum", "count"])
-    global_winrates = (
-        (global_grouped["sum"] + config.role_alpha)
-        / (global_grouped["count"] + config.role_alpha + config.role_beta)
-    ).to_dict()
+    global_winrates = cast(
+        "dict[str, float]",
+        (
+            (global_grouped["sum"] + config.role_alpha)
+            / (global_grouped["count"] + config.role_alpha + config.role_beta)
+        ).to_dict(),
+    )
 
     logger.info(f"Computed global winrates for {len(global_winrates)} champions")
 
@@ -380,5 +383,5 @@ def build_tables(config: SmoothingConfig | None = None) -> Path | None:
     return run_dir
 
 
-if __name__ == "__main__": # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     build_tables()

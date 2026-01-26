@@ -145,11 +145,9 @@ class TestBuildTables:
                 "winner": "BLUE",
             }
         ]
-        
+
         # Write JSON file
-        (parsed_dir / "test_matches.json").write_text(
-            json.dumps(match_data), encoding="utf-8"
-        )
+        (parsed_dir / "test_matches.json").write_text(json.dumps(match_data), encoding="utf-8")
 
         # Run with low min_samples to ensure pairs are included
         config = SmoothingConfig(min_samples=1)
@@ -189,14 +187,15 @@ class TestBuildTables:
         assert run_dir is not None
 
     @patch("app.ml.build_tables.settings")
-    @patch("app.ml.build_tables.pd.read_parquet")
-    def test_build_tables_empty_dataframe(self, mock_read, mock_settings, tmp_path: Path):
+    def test_build_tables_empty_dataframe(self, mock_settings, tmp_path: Path):
         """Should handle empty DataFrame gracefully."""
         mock_settings.data_root = tmp_path
         mock_settings.ingest.paths.parsed_dir = "parsed"
-        (tmp_path / "parsed").mkdir()
+        parsed_dir = tmp_path / "parsed"
+        parsed_dir.mkdir()
 
-        mock_read.return_value = pd.DataFrame()
+        # Empty list in JSON
+        (parsed_dir / "matches.json").write_text("[]")
 
         result = build_tables()
 
@@ -213,19 +212,19 @@ class TestBuildTables:
         assert result is None
 
     @patch("app.ml.build_tables.settings")
-    @patch("app.ml.build_tables.pd.read_parquet")
     @patch("app.ml.build_tables.save_artifact_bundle")
-    def test_build_tables_malformed_data(self, mock_save, mock_read, mock_settings, tmp_path: Path):
+    def test_build_tables_malformed_data(self, mock_save, mock_settings, tmp_path: Path):
         """Should skip malformed rows and continue."""
         mock_settings.data_root = tmp_path
         mock_settings.ingest.paths.parsed_dir = "parsed"
-        (tmp_path / "parsed").mkdir()
+        parsed_dir = tmp_path / "parsed"
+        parsed_dir.mkdir()
 
-        # Data with bad JSON
-        df_raw = pd.DataFrame(
-            [{"match_id": "m1", "blue_team": "bad_json", "red_team": "[]", "winner": "BLUE"}]
-        )
-        mock_read.return_value = df_raw
+        # Data with bad JSON string for teams
+        match_data = [
+            {"match_id": "m1", "blue_team": "bad_json", "red_team": "[]", "winner": "BLUE"}
+        ]
+        (parsed_dir / "matches.json").write_text(json.dumps(match_data))
 
         result = build_tables()
 
@@ -234,24 +233,26 @@ class TestBuildTables:
         mock_save.assert_not_called()
 
     @patch("app.ml.build_tables.settings")
-    @patch("app.ml.build_tables.pd.read_parquet")
-    def test_build_tables_read_error(self, mock_read, mock_settings, tmp_path: Path):
-        """Should handle read errors gracefully."""
+    def test_build_tables_read_error(self, mock_settings, tmp_path: Path):
+        """Should handle file read errors gracefully."""
         mock_settings.data_root = tmp_path
         mock_settings.ingest.paths.parsed_dir = "parsed"
-        (tmp_path / "parsed").mkdir()
+        parsed_dir = tmp_path / "parsed"
+        parsed_dir.mkdir()
 
-        mock_read.side_effect = Exception("Read failed")
+        # Create a file
+        f = parsed_dir / "test.json"
+        f.touch()
 
-        result = build_tables()
+        # Mock pathlib.Path.read_text to raise exception
+        with patch("pathlib.Path.read_text", side_effect=OSError("Read failed")):
+            result = build_tables()
 
         assert result is None
 
     @patch("app.ml.build_tables.settings")
     @patch("app.ml.build_tables.save_artifact_bundle")
-    def test_build_tables_with_custom_config(
-        self, mock_save, mock_settings, tmp_path: Path
-    ):
+    def test_build_tables_with_custom_config(self, mock_save, mock_settings, tmp_path: Path):
         """Should use custom smoothing config."""
         mock_settings.data_root = tmp_path
         mock_settings.ingest.paths.parsed_dir = "parsed"
@@ -270,11 +271,9 @@ class TestBuildTables:
                 "winner": "BLUE",
             }
         ]
-        
+
         # Write JSON file
-        (parsed_dir / "test_matches.json").write_text(
-            json.dumps(match_data), encoding="utf-8"
-        )
+        (parsed_dir / "test_matches.json").write_text(json.dumps(match_data), encoding="utf-8")
 
         # Custom config with stronger smoothing
         config = SmoothingConfig(role_alpha=10.0, role_beta=10.0, min_samples=1)
@@ -288,32 +287,105 @@ class TestBuildTables:
         assert abs(ahri_wr - 0.524) < 0.01
 
     @patch("app.ml.build_tables.settings")
-    @patch("app.ml.build_tables.pd.read_parquet")
     @patch("app.ml.build_tables.ArtifactStats")
-    def test_build_tables_validation_error(self, mock_artifact_stats, mock_read, mock_settings, tmp_path: Path):
+    def test_build_tables_validation_error(
+        self, mock_artifact_stats, mock_settings, tmp_path: Path
+    ):
         """Should handle ArtifactStats validation errors gracefully."""
         mock_settings.data_root = tmp_path
         mock_settings.ingest.paths.parsed_dir = "parsed"
-        (tmp_path / "parsed").mkdir()
+        parsed_dir = tmp_path / "parsed"
+        parsed_dir.mkdir()
 
         blue = [{"c": "Ahri", "r": "mid"}]
         red = [{"c": "Zed", "r": "mid"}]
 
-        df_raw = pd.DataFrame(
-            [
-                {
-                    "match_id": "m1",
-                    "blue_team": json.dumps(blue),
-                    "red_team": json.dumps(red),
-                    "winner": "BLUE",
-                }
-            ]
-        )
-        mock_read.return_value = df_raw
+        match_data = [
+            {
+                "match_id": "m1",
+                "blue_team": json.dumps(blue),
+                "red_team": json.dumps(red),
+                "winner": "BLUE",
+            }
+        ]
+
+        # Write JSON file so loading works
+        (parsed_dir / "match.json").write_text(json.dumps(match_data))
 
         # Make ArtifactStats raise a validation error
         mock_artifact_stats.side_effect = ValueError("Invalid stats")
 
         result = build_tables()
+        assert result is None
 
+    @patch("app.ml.build_tables.settings")
+    def test_build_tables_single_dict_json(self, mock_settings, tmp_path: Path):
+        """Test loading a JSON file containing a single dict, not a list."""
+        parsed_dir = tmp_path / "parsed"
+        parsed_dir.mkdir(parents=True)
+
+        match_data = {"match_id": "m1", "blue_team": "[]", "red_team": "[]", "winner": "BLUE"}
+        (parsed_dir / "match.json").write_text(json.dumps(match_data))
+
+        mock_settings.data_root = tmp_path
+        mock_settings.ingest.paths.parsed_dir = "parsed"
+        mock_settings.artifacts_path = tmp_path / "artifacts"
+
+        # Result will be None because participants empty (blue_team is empty string list)
+        assert build_tables() is None
+
+    @patch("app.ml.build_tables.settings")
+    def test_build_tables_malformed_json_content(self, mock_settings, tmp_path: Path):
+        """Test JSON file that raises exception during load."""
+        parsed_dir = tmp_path / "parsed"
+        parsed_dir.mkdir(parents=True)
+
+        (parsed_dir / "bad.json").write_text("{invalid")
+
+        mock_settings.data_root = tmp_path
+        mock_settings.ingest.paths.parsed_dir = "parsed"
+
+        # Should return None because no valid data loaded if only bad file
+        assert build_tables() is None
+
+    @patch("app.ml.build_tables.settings")
+    def test_build_tables_no_participants_extracted(self, mock_settings, tmp_path: Path):
+        """Test when match data is valid JSON but malformed structure (key error)."""
+        parsed_dir = tmp_path / "parsed"
+        parsed_dir.mkdir(parents=True)
+
+        # Missing blue_team key
+        match_data = [{"match_id": "m1"}]
+        (parsed_dir / "match.json").write_text(json.dumps(match_data))
+
+        mock_settings.data_root = tmp_path
+        mock_settings.ingest.paths.parsed_dir = "parsed"
+
+        # Should hit malformed_count increment and return None (no participants)
+        assert build_tables() is None
+
+    @patch("app.ml.build_tables.settings")
+    @patch("app.ml.build_tables.pd.DataFrame")
+    def test_build_tables_dataframe_creation_error(
+        self, mock_df_cls, mock_settings, tmp_path: Path
+    ):
+        """Test exception during DataFrame creation."""
+        mock_settings.data_root = tmp_path
+        mock_settings.ingest.paths.parsed_dir = "parsed"
+        (tmp_path / "parsed").mkdir()
+        (tmp_path / "parsed" / "m.json").write_text('{"id": 1}')
+
+        mock_df_cls.side_effect = Exception("Pandas Error")
+
+        assert build_tables() is None
+
+    @patch("app.ml.build_tables.settings")
+    def test_build_tables_no_json_files(self, mock_settings, tmp_path: Path):
+        """Should handle case where parsed directory exists but has no JSON files."""
+        mock_settings.data_root = tmp_path
+        mock_settings.ingest.paths.parsed_dir = "parsed"
+        (tmp_path / "parsed").mkdir()
+
+        # Dir exists, but is empty (no .json files)
+        result = build_tables()
         assert result is None

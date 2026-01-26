@@ -12,29 +12,22 @@ from app.schemas.recommend import RecommendDraftRequest
 @pytest.fixture
 def mock_registry():
     registry = Mock()
-    
+
     # Create complete ArtifactStats with all required fields
     stats = ArtifactStats(
-        role_strength={
-            "TOP": {"Aatrox": 0.52, "Riven": 0.50},
-            "JUNGLE": {"LeeSin": 0.51}
-        },
+        role_strength={"TOP": {"Aatrox": 0.52, "Riven": 0.50}, "JUNGLE": {"LeeSin": 0.51}},
         synergy={},
         counter={},
-        global_winrates={"Aatrox": 0.51, "Riven": 0.49, "LeeSin": 0.50}
+        global_winrates={"Aatrox": 0.51, "Riven": 0.49, "LeeSin": 0.50},
     )
-    
+
     # Create complete ManifestData with all required fields
     manifest = ManifestData(
-        run_id="test_run",
-        timestamp=1706112000.0,
-        rows_count=5000,
-        source="/test/data"
+        run_id="test_run", timestamp=1706112000.0, rows_count=5000, source="/test/data"
     )
-    
+
     registry.load_latest.return_value = ArtifactBundle(stats=stats, manifest=manifest)
     return registry
-
 
 
 def test_recommend_draft_basic(mock_registry):

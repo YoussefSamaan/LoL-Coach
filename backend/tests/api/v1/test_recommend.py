@@ -16,26 +16,22 @@ client = TestClient(app)
 @pytest.fixture
 def mock_registry_dependency():
     mock_reg = Mock(spec=ModelRegistry)
-    
+
     # Create complete ArtifactStats with all required fields
     stats = ArtifactStats(
         role_strength={"MID": {"Ahri": 0.55}},
         synergy={},
         counter={},
-        global_winrates={"Ahri": 0.52}
+        global_winrates={"Ahri": 0.52},
     )
-    
+
     # Create complete ManifestData with all required fields
     manifest = ManifestData(
-        run_id="test_run",
-        timestamp=1706112000.0,
-        rows_count=1000,
-        source="/test/data"
+        run_id="test_run", timestamp=1706112000.0, rows_count=1000, source="/test/data"
     )
-    
+
     mock_reg.load_latest.return_value = ArtifactBundle(stats=stats, manifest=manifest)
     return mock_reg
-
 
 
 def test_recommend_endpoint_success(mock_registry_dependency):
