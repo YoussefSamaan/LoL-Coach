@@ -4,6 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+import os
 import yaml
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
@@ -52,9 +53,15 @@ class MLConfig(BaseModel):
     model_name: str = "draft_model"
 
 
+class GenAIConfig(BaseModel):
+    api_key: str = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
+    model: str = "gemini-1.5-flash"
+
+
 class Settings(BaseModel):
     ingest: IngestConfig
     ml: MLConfig = Field(default_factory=MLConfig)
+    genai: GenAIConfig = Field(default_factory=GenAIConfig)
 
     @property
     def backend_root(self) -> Path:
