@@ -93,3 +93,31 @@ def test_parse_match_row_missing_bans_map(rank_ctx):
 
     result = parse_match_row(data, {}, rank_ctx)  # Empty ID map
     assert result["blue_bans"] == []  # Should be empty, warning logged
+
+
+def test_parser_skip_minus_one_ban(id_map, rank_ctx):
+    """Test that parser skips bans with championId '-1'."""
+    info = {
+        "gameMode": "CLASSIC",
+        "gameVersion": "14.1.1",
+        "gameCreation": 1700000000000,
+        "participants": [],
+        "teams": [
+            {"teamId": 100, "bans": [{"championId": -1}, {"championId": 1}]},
+            {"teamId": 200, "bans": []},
+        ],
+    }
+
+    # Needs valid participants to pass team size check
+    blue = [{"teamId": 100, "championName": "A", "teamPosition": "TOP", "win": True}] * 5
+    red = [{"teamId": 200, "championName": "B", "teamPosition": "TOP", "win": False}] * 5
+    info["participants"] = blue + red
+
+    data = {"metadata": {"matchId": "NA1_123"}, "info": info}
+
+    result = parse_match_row(data, id_map, rank_ctx)
+
+    assert result is not None
+    assert "Annie" in result["blue_bans"]
+    # -1 should be skipped, so bans list should have Annie and nothing else for blue
+    assert len(result["blue_bans"]) == 1

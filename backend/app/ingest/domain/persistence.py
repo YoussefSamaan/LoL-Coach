@@ -55,6 +55,21 @@ def batch_process_raw_matches(
             match_id = raw.get("metadata", {}).get("matchId")
             ctx = rank_map.get(match_id, {})
 
+            # If context is missing (fresh run without scan), try to infer from path
+            # Structure: .../raw/REGION/TIER/DIV/DATE/MATCH_ID.json
+            if not ctx.get("region") or not ctx.get("tier"):
+                try:
+                    rel_path = f.relative_to(input_dir)
+                    # We expect at least 4 parts: Region, Tier, Div, Date, Filename
+                    if len(rel_path.parts) >= 4:
+                        ctx = {
+                            "region": rel_path.parts[0],
+                            "tier": rel_path.parts[1],
+                            "division": rel_path.parts[2],
+                        }
+                except Exception:
+                    pass
+
             new_row = parse_match_row(raw, id_map, ctx)
 
             if new_row:

@@ -192,3 +192,53 @@ def test_batch_process_save_exception(tmp_path, id_map, rank_map):
     # This should trigger exception in the save loop
     batch_process_raw_matches(in_dir, bad_root, id_map, rank_map)
     # Should be caught and logged
+
+
+def test_persistence_infer_rank_from_path(tmp_path):
+    """Test inferring rank context from file path."""
+    from unittest.mock import patch
+
+    input_dir = tmp_path / "raw"
+    match_file = input_dir / "NA" / "CHALLENGER" / "I" / "2024-01-01" / "NA1_123.json"
+    match_file.parent.mkdir(parents=True, exist_ok=True)
+
+    match_data = {"metadata": {"matchId": "NA1_123"}, "info": {"gameCreation": 1700000000000}}
+    match_file.write_text(json.dumps(match_data))
+
+    output_root = tmp_path / "parsed"
+
+    # Mock parse_match_row to avoid needing valid match data
+    with patch("app.ingest.domain.persistence.parse_match_row") as mock_parse:
+        mock_parse.return_value = {"match_id": "NA1_123"}
+
+        batch_process_raw_matches(
+            input_dir=input_dir,
+            output_root=output_root,
+            id_map={},
+            rank_map={},  # Empty rank map to trigger inference
+            output_format="json",
+        )
+
+        # Verify call args had inferred context
+        args, _ = mock_parse.call_args
+        ctx = args[2]
+        assert ctx["region"] == "NA"
+        assert ctx["tier"] == "CHALLENGER"
+        assert ctx["division"] == "I"
+
+
+def test_persistence_infer_rank_error(tmp_path):
+    """Test inference failure (exception during relative_to)."""
+    from unittest.mock import patch
+
+    input_dir = tmp_path / "raw"
+    input_dir.mkdir()
+    match_file = input_dir / "file.json"
+    match_file.write_text(
+        json.dumps({"metadata": {"matchId": "m1"}, "info": {"gameCreation": 100}})
+    )
+
+    # Mock relative_to to raise exception
+    with patch("pathlib.Path.relative_to", side_effect=ValueError("fail")):
+        # Should not crash, just pass
+        batch_process_raw_matches(input_dir, tmp_path / "out", {}, {}, min_time=0)

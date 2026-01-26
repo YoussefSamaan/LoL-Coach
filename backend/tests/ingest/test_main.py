@@ -42,3 +42,42 @@ def test_main_cleanup_flag(MockPipeline):
         main()
 
     assert pipeline_instance.add_step.call_count == 7
+
+
+def test_main_skip_download_stages(tmp_path):
+    """Test main.py logic when download is skipped but parse is enabled."""
+    from unittest.mock import MagicMock
+
+    # Mock settings
+    mock_settings = MagicMock()
+    mock_settings.data_root = tmp_path
+    mock_settings.ingest.paths.raw_dir = "raw"
+
+    # stages: download=False, parse=True
+    mock_settings.ingest.stages.fetch = False
+    mock_settings.ingest.stages.scan = False
+    mock_settings.ingest.stages.download = False
+    mock_settings.ingest.stages.parse = True
+    mock_settings.ingest.stages.aggregate = False
+
+    with (
+        patch("app.ingest.main.settings", mock_settings),
+        patch("app.ingest.main.IngestPipeline") as MockPipeline,
+    ):
+        pipeline_instance = MockPipeline.return_value
+
+        # Mock arg parser
+        with patch("argparse.ArgumentParser.parse_args") as mock_args:
+            mock_args.return_value = MagicMock(
+                cleanup_raw=False, since=0, format="parquet", note=""
+            )
+
+            main()
+
+            # Verify context state had raw_dir set
+            # access pipeline.execute(context) call
+            assert pipeline_instance.execute.called
+            context = pipeline_instance.execute.call_args[0][0]
+
+            assert "raw_dir" in context.state
+            assert context.state["raw_dir"] == tmp_path / "raw"

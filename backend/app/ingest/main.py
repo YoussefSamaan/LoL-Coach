@@ -50,14 +50,27 @@ def main() -> int:
     context.state["min_match_time"] = args.since
     context.state["output_format"] = args.format
 
+    # If skipping download but running parse, we need to point to existing raw dir
+    if not settings.ingest.stages.download and settings.ingest.stages.parse:
+        context.state["raw_dir"] = base_dir / settings.ingest.paths.raw_dir
+
     pipeline = IngestPipeline()
 
-    pipeline.add_step(FetchStaticDataStep())
-    pipeline.add_step(ScanLadderStep())
-    pipeline.add_step(ScanHistoryStep())
-    pipeline.add_step(DownloadContentStep())
-    pipeline.add_step(ParseMatchStep())
-    pipeline.add_step(AggregateStatsStep())
+    if settings.ingest.stages.fetch:
+        pipeline.add_step(FetchStaticDataStep())
+
+    if settings.ingest.stages.scan:
+        pipeline.add_step(ScanLadderStep())
+        pipeline.add_step(ScanHistoryStep())
+
+    if settings.ingest.stages.download:
+        pipeline.add_step(DownloadContentStep())
+
+    if settings.ingest.stages.parse:
+        pipeline.add_step(ParseMatchStep())
+
+    if settings.ingest.stages.aggregate:
+        pipeline.add_step(AggregateStatsStep())
 
     if args.cleanup_raw:
         pipeline.add_step(CleanupStep(target_key="raw_dir"))

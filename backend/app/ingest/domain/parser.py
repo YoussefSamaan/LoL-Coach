@@ -96,7 +96,7 @@ def parse_match_row(match_data: dict, id_map: dict, rank_ctx: dict) -> dict | No
             # " -1" often signifies no ban in Riot API
             if cid == "-1":
                 continue
-                
+
             cname = id_map.get(cid)
             if cname:
                 target.append(cname)

@@ -22,6 +22,16 @@ defaults:
   min_match_time: 0
   # Whether to fetch new champion mapping from DataDragon (default: true)
   fetch_champion_map: true
+  # Whether to delete raw JSON files after processing (default: false)
+  cleanup_raw: false
+
+# Execution Control
+stages:
+  fetch: true
+  scan: true
+  download: true
+  parse: true
+  aggregate: true
 
 # Source Configurations (Ladder Scans)
 # Total target: ~300 players * 40 matches = 12,000 matches

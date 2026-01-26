@@ -27,9 +27,18 @@ class PathsConfig(BaseModel):
     manifest_dir: str = "manifests"
 
 
+class StagesConfig(BaseModel):
+    fetch: bool = True
+    scan: bool = True
+    download: bool = True
+    parse: bool = True
+    aggregate: bool = True
+
+
 class IngestConfig(BaseModel):
     paths: PathsConfig
     defaults: dict = Field(default_factory=dict)
+    stages: StagesConfig = Field(default_factory=StagesConfig)
     sources: list = Field(default_factory=list)
     save_by_run: bool = False
 
