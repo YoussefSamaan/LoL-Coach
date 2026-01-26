@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-import google.generativeai as genai
+from google import genai
 
 from app.config.settings import settings
 
@@ -31,14 +31,14 @@ class GeminiClient(LLMClient):
             # but for now, we assume key is present if this client is instantiated.
             raise ValueError("GEMINI_API_KEY is not set.")
 
-        genai.configure(api_key=settings.genai.api_key)
-        self.model = genai.GenerativeModel(settings.genai.model)
+        self.client = genai.Client(api_key=settings.genai.api_key)
+        self.model = settings.genai.model
 
     def generate(self, prompt: str) -> str:
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model, contents=prompt)
             # Gemini response object has a .text property
-            return response.text
+            return response.text or ""
         except Exception as e:
             # Wrap or re-raise exceptions specific to the provider
             raise RuntimeError(f"Gemini generation failed: {e}") from e

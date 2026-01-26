@@ -13,9 +13,8 @@ def test_gemini_client_initialization(mock_settings, mock_genai):
 
     client = GeminiClient()
 
-    mock_genai.configure.assert_called_with(api_key="test_key")
-    mock_genai.GenerativeModel.assert_called_with("test_model")
-    assert client.model is not None
+    mock_genai.Client.assert_called_with(api_key="test_key")
+    assert client.model == "test_model"
 
 
 @patch("app.genai.client.settings")
@@ -32,18 +31,21 @@ def test_gemini_client_missing_key(mock_settings):
 def test_gemini_client_generate(mock_settings, mock_genai):
     """Test generating content using GeminiClient."""
     mock_settings.genai.api_key = "test_key"
+    mock_settings.genai.model = "test_model"
 
-    mock_model = MagicMock()
+    mock_client_instance = MagicMock()
     mock_response = MagicMock()
     mock_response.text = "Generated explanation"
-    mock_model.generate_content.return_value = mock_response
-    mock_genai.GenerativeModel.return_value = mock_model
+    mock_client_instance.models.generate_content.return_value = mock_response
+    mock_genai.Client.return_value = mock_client_instance
 
     client = GeminiClient()
     response = client.generate("test prompt")
 
     assert response == "Generated explanation"
-    mock_model.generate_content.assert_called_with("test prompt")
+    mock_client_instance.models.generate_content.assert_called_with(
+        model="test_model", contents="test prompt"
+    )
 
 
 @patch("app.genai.client.genai")
@@ -51,10 +53,11 @@ def test_gemini_client_generate(mock_settings, mock_genai):
 def test_gemini_client_generate_error(mock_settings, mock_genai):
     """Test handling of generation errors."""
     mock_settings.genai.api_key = "test_key"
+    mock_settings.genai.model = "test_model"
 
-    mock_model = MagicMock()
-    mock_model.generate_content.side_effect = Exception("API Error")
-    mock_genai.GenerativeModel.return_value = mock_model
+    mock_client_instance = MagicMock()
+    mock_client_instance.models.generate_content.side_effect = Exception("API Error")
+    mock_genai.Client.return_value = mock_client_instance
 
     client = GeminiClient()
 
