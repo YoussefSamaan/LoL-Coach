@@ -55,7 +55,7 @@ class MLConfig(BaseModel):
 
 class GenAIConfig(BaseModel):
     api_key: str = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
-    model: str = "gemini-1.5-flash"
+    model: str = "gemini-3-flash-preview"
 
 
 class Settings(BaseModel):

@@ -72,7 +72,8 @@ export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<R
                     championName: championInfo ? championInfo.name : r.champion,
                     // Score is probability 0-1, Convert to 0-100 integer for UI
                     score: Math.round(r.score * 100),
-                    primaryReason: r.reasons && r.reasons.length > 0 ? r.reasons[0] : 'Recommended based on draft state'
+                    primaryReason: r.reasons && r.reasons.length > 0 ? r.reasons[0] : 'Recommended based on draft state',
+                    explanation: r.explanation
                 };
             });
 

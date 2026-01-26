@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.genai.explanations import build_explanation
+from app.genai.explanations import generate_ai_explanation
 from app.ml.scoring import ScoringConfig, score_candidate
 from app.schemas.recommend import RecommendDraftRequest, RecommendDraftResponse, Recommendation
 from app.services.model_registry import ModelRegistry
@@ -47,7 +47,12 @@ class RecommendService:
                 champion=champion,
                 score=score,
                 reasons=reasons,
-                explanation=build_explanation(champion=champion, reasons=reasons),
+                explanation=generate_ai_explanation(
+                    champion=champion,
+                    allies=payload.allies,
+                    enemies=payload.enemies,
+                    reasons=reasons,
+                ),
             )
             for champion, score, reasons in scored[: payload.top_k]
         ]

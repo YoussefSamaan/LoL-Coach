@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from app.services.recommend_service import RecommendService
 from app.ml.scoring import ScoringConfig
@@ -30,8 +30,11 @@ def mock_registry():
     return registry
 
 
-def test_recommend_draft_basic(mock_registry):
+@patch("app.services.recommend_service.generate_ai_explanation")
+def test_recommend_draft_basic(mock_genai, mock_registry):
+    mock_genai.side_effect = lambda champion, **kwargs: f"Mock explanation for {champion}"
     config = ScoringConfig()
+
     service = RecommendService(registry=mock_registry, config=config)
 
     payload = RecommendDraftRequest(
@@ -50,10 +53,12 @@ def test_recommend_draft_basic(mock_registry):
 
     # Check explanation format
     top_rec = resp.recommendations[0]
-    assert f"{top_rec.champion}:" in top_rec.explanation
+    assert f"Mock explanation for {top_rec.champion}" == top_rec.explanation
 
 
-def test_recommend_draft_filtering(mock_registry):
+@patch("app.services.recommend_service.generate_ai_explanation")
+def test_recommend_draft_filtering(mock_genai, mock_registry):
+    mock_genai.return_value = "Mock explanation"
     # Filter out taken champs
     config = ScoringConfig()
     service = RecommendService(registry=mock_registry, config=config)
@@ -67,7 +72,9 @@ def test_recommend_draft_filtering(mock_registry):
     assert "Aatrox" in champs
 
 
-def test_recommend_draft_empty_pool(mock_registry):
+@patch("app.services.recommend_service.generate_ai_explanation")
+def test_recommend_draft_empty_pool(mock_genai, mock_registry):
+    mock_genai.return_value = "Mock explanation"
     # Request for a role with no stats
     config = ScoringConfig()
     service = RecommendService(registry=mock_registry, config=config)

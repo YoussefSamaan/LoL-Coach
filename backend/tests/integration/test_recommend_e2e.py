@@ -155,12 +155,18 @@ class TestRecommendationSystemE2E:
         scoring_config = ScoringConfig()
         service = RecommendService(registry=registry, config=scoring_config)
 
+        from unittest.mock import patch
+
         # Request recommendations for MID with Amumu as ally
         request = RecommendDraftRequest(
             role=Role.MID, allies=["Amumu"], enemies=["Zed"], bans=["Yasuo"], top_k=5
         )
 
-        response = service.recommend_draft(request)
+        with patch(
+            "app.services.recommend_service.generate_ai_explanation",
+            side_effect=lambda **kwargs: "Mock Explanation",
+        ):
+            response = service.recommend_draft(request)
 
         # Verify response structure
         assert response.role == Role.MID

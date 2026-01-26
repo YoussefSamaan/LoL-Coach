@@ -17,4 +17,5 @@ export interface Recommendation {
     championName: string;
     score: number;
     primaryReason: string;
+    explanation?: string;
 }
