@@ -44,7 +44,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({ rec, ran
                         <div className="flex items-start gap-2">
                             <TrendingUp size={14} className="text-blue-400 mt-0.5 shrink-0" />
                             <div>
-                                <span className="text-[10px] text-blue-400 font-bold uppercase block mb-0.5">Coach's Analysis</span>
+                                <span className="text-[10px] text-blue-400 font-bold uppercase block mb-0.5">Coach&apos;s Analysis</span>
                                 <p className="text-xs text-slate-300 leading-snug line-clamp-3">
                                     {rec.explanation || rec.primaryReason || "Strong meta pick for this role."}
                                 </p>
