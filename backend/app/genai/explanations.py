@@ -28,6 +28,11 @@ def generate_ai_explanation(
         enemies: List of enemy champion names.
         reasons: Optional list of heuristic reasons to incorporate.
     """
+    from app.config.settings import settings
+
+    if not settings.genai.api_key:
+        return build_explanation(champion=champion, reasons=reasons or [])
+
     try:
         client = get_client("gemini")
         # specific prompt construction could happen here or in prompts.py
