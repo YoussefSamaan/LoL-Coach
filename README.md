@@ -94,7 +94,7 @@ graph TD
         req(User Draft) --> API[FastAPI Endpoint]
         E -.->|Load| Model[Model Registry]
         Model -->|Score| API
-        API -->|Context| LLM[LLM (Gemini / OpenAI)]
+        API -->|Context| LLM["LLM (Gemini / OpenAI)"]
         LLM -->|Commentary| res(Final Response)
     end
 ```
