@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from google import genai
+import openai
 
 from app.config.settings import settings
 
@@ -26,13 +27,12 @@ class GeminiClient(LLMClient):
     """Gemini implementation of LLMClient."""
 
     def __init__(self) -> None:
-        if not settings.genai.api_key:
-            # We might want to log a warning or handle this gracefully,
-            # but for now, we assume key is present if this client is instantiated.
+        # Explicitly check for Gemini key
+        if not settings.genai.gemini_api_key:
             raise ValueError("GEMINI_API_KEY is not set.")
 
-        self.client = genai.Client(api_key=settings.genai.api_key)
-        self.model = settings.genai.model
+        self.client = genai.Client(api_key=settings.genai.gemini_api_key)
+        self.model = settings.genai.gemini_model
 
     def generate(self, prompt: str) -> str:
         try:
@@ -44,9 +44,36 @@ class GeminiClient(LLMClient):
             raise RuntimeError(f"Gemini generation failed: {e}") from e
 
 
-def get_client(provider: str = "gemini") -> LLMClient:
+class OpenAIClient(LLMClient):
+    """OpenAI implementation of LLMClient."""
+
+    def __init__(self) -> None:
+        if not settings.genai.openai_api_key:
+            raise ValueError("OPENAI_API_KEY is not set.")
+
+        self.client = openai.OpenAI(api_key=settings.genai.openai_api_key)
+        self.model = settings.genai.openai_model
+
+    def generate(self, prompt: str) -> str:
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return response.choices[0].message.content or ""
+        except Exception as e:
+            raise RuntimeError(f"OpenAI generation failed: {e}") from e
+
+
+def get_client(provider: str | None = None) -> LLMClient:
     """Factory to get the appropriate LLM client."""
+    # Use settings provider if not specified
+    if provider is None:
+        provider = settings.genai.provider
+
     if provider.lower() == "gemini":
         return GeminiClient()
-    # extendable for "openai", "anthropic", etc.
+    elif provider.lower() == "openai":
+        return OpenAIClient()
+
     raise ValueError(f"Unknown provider: {provider}")

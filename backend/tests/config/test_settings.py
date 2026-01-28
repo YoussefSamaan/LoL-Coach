@@ -108,3 +108,29 @@ def test_should_fetch_champion_map():
     # Case 3: Explicitly False
     config3 = IngestConfig(paths=paths, defaults={"fetch_champion_map": False})
     assert config3.should_fetch_champion_map is False
+
+
+def test_genai_config_providers():
+    """Test GenAIConfig provider switching logic."""
+    from app.config.settings import GenAIConfig
+
+    # Case 1: Default (Gemini)
+    config = GenAIConfig(
+        provider="gemini",
+        gemini_api_key="gem_key",
+        gemini_model="gem_model",
+        openai_api_key="oa_key",
+        openai_model="oa_model",
+    )
+    assert config.api_key == "gem_key"
+    assert config.model == "gem_model"
+
+    # Case 2: OpenAI
+    config.provider = "openai"
+    assert config.api_key == "oa_key"
+    assert config.model == "oa_model"
+
+    # Case 3: Random/Unknown (should fallback to Gemini logic as per impl)
+    config.provider = "other"
+    assert config.api_key == "gem_key"
+    assert config.model == "gem_model"

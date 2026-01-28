@@ -29,7 +29,7 @@ def test_generate_ai_explanation_success(mock_get_client, mock_settings):
     )
 
     assert result == "AI generated explanation"
-    mock_get_client.assert_called_with("gemini")
+    mock_get_client.assert_called_with()
     mock_client.generate.assert_called_once()
 
     # Verify prompt contains key info

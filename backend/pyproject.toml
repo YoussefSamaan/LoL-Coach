@@ -19,6 +19,7 @@ dependencies = [
   "pandas",
   "pyarrow",
   "google-genai",
+  "openai",
 ]
 
 [project.optional-dependencies]

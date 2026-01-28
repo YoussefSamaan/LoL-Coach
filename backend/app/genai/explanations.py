@@ -34,7 +34,7 @@ def generate_ai_explanation(
         return build_explanation(champion=champion, reasons=reasons or [])
 
     try:
-        client = get_client("gemini")
+        client = get_client()
         # specific prompt construction could happen here or in prompts.py
         # extending DraftPrompts to accept reasons would be good.
         # For now, let's just use the basic one.

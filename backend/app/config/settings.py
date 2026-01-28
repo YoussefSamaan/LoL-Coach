@@ -54,8 +54,25 @@ class MLConfig(BaseModel):
 
 
 class GenAIConfig(BaseModel):
-    api_key: str = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
-    model: str = "gemini-3-flash-preview"
+    provider: str = Field(default_factory=lambda: os.getenv("GENAI_PROVIDER", "gemini"))
+    # Gemini settings
+    gemini_api_key: str = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
+    gemini_model: str = "gemini-3-flash-preview"
+    # OpenAI settings
+    openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
+    openai_model: str = "gpt-4-turbo-preview"
+
+    @property
+    def api_key(self) -> str:
+        if self.provider == "openai":
+            return self.openai_api_key
+        return self.gemini_api_key
+
+    @property
+    def model(self) -> str:
+        if self.provider == "openai":
+            return self.openai_model
+        return self.gemini_model
 
 
 class Settings(BaseModel):
