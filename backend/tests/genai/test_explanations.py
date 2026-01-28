@@ -15,9 +15,11 @@ def test_build_explanation_with_reasons():
     assert expl == "Ahri: Good mobility; High damage"
 
 
+@patch("app.config.settings.settings")
 @patch("app.genai.explanations.get_client")
-def test_generate_ai_explanation_success(mock_get_client):
+def test_generate_ai_explanation_success(mock_get_client, mock_settings):
     """Test successful AI explanation generation."""
+    mock_settings.genai.api_key = "test-key"
     mock_client = MagicMock()
     mock_client.generate.return_value = "AI generated explanation"
     mock_get_client.return_value = mock_client
@@ -38,9 +40,11 @@ def test_generate_ai_explanation_success(mock_get_client):
     assert "Reason 1" in prompt_used
 
 
+@patch("app.config.settings.settings")
 @patch("app.genai.explanations.get_client")
-def test_generate_ai_explanation_failure(mock_get_client):
+def test_generate_ai_explanation_failure(mock_get_client, mock_settings):
     """Test fallback to heuristic when AI generation fails."""
+    mock_settings.genai.api_key = "test-key"
     mock_client = MagicMock()
     mock_client.generate.side_effect = Exception("API Error")
     mock_get_client.return_value = mock_client
