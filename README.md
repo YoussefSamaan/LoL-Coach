@@ -81,6 +81,24 @@ cd LoL-Coach
 
 ## 🚀 Workflow
 
+```mermaid
+graph TD
+    subgraph "Ingestion Pipeline (Offline)"
+        A[Riot API] -->|Fetch| B(Raw Match Data)
+        B -->|Parse| C{Strategy: Parser}
+        C -->|Aggregate| D[Win Rates & Counters]
+        D -->|Smooth| E[Additive Lift Artifacts]
+    end
+
+    subgraph "Inference (Real-time)"
+        req(User Draft) --> API[FastAPI Endpoint]
+        E -.->|Load| Model[Model Registry]
+        Model -->|Score| API
+        API -->|Context| Gemini[Gemini 1.5 Flash]
+        Gemini -->|Commentary| res(Final Response)
+    end
+```
+
 1.  **Ingest**: The backend pipeline fetches match data from Riot, parsed into efficient artifacts.
 2.  **Offline artifact build**: Aggregates winrates/synergy/counter lifts and applies smoothing to produce versioned artifacts used by inference.
 3.  **Draft UI**: Users select their team and enemy team in the Next.js frontend.
@@ -88,6 +106,16 @@ cd LoL-Coach
     *   Base Role Winrate
     *   Synergy with Allies
     *   Counters to Enemies
+
+    The scoring engine uses an **Additive Lift Model** to ensure interpretability. Unlike "black box" neural networks, every percentage point in the final score can be traced back to a specific synergy or counter relationship.
+
+    $$P(\text{Win} | \text{Draft}) \approx P_{\text{base}} + \sum \text{Lift}_{\text{synergy}} + \sum \text{Lift}_{\text{counter}}$$
+
+    Where:
+    *   $P_{\text{base}}$ is the champion's baseline winrate in the target role.
+    *   $\text{Lift}_{\text{synergy}}$ is the probability delta ($P(\text{Win}|\text{Teammate}) - P_{\text{base}}$).
+    *   $\text{Lift}_{\text{counter}}$ is the probability delta ($P(\text{Win}|\text{Enemy}) - P_{\text{base}}$).
+
 5.  **Explain**: Returns the "Why" (e.g., "+4% winrate with Jinx").
 
 ---
@@ -203,6 +231,8 @@ LoL Coach/
 │   │   ├── schemas/        # Pydantic Models
 │   │   ├── services/       # Service Layer (ModelRegistry)
 │   │   └── utils/          # Logging & Helpers
+│   ├── artifacts/          # ML Model Artifacts & Stats
+│   ├── data/               # Raw & Processed Data
 │   └── tests/              # 100% Coverage Suite
 ├── frontend/
 │   ├── app/                # Next.js App Router
@@ -213,7 +243,6 @@ LoL Coach/
 │   ├── constants/          # App Constants
 │   ├── types/              # TypeScript Definitions
 │   └── tests/              # 100% Coverage Suite
-├── context/                # Specifications, Reviews, & Status Boards
 ├── run_backend.sh          # Backend Setup/Test/Run Script
 ├── run_frontend.sh         # Frontend Setup/Test/Run Script
 └── config.yml              # Central Dev Config
