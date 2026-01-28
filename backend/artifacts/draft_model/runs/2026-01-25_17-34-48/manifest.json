@@ -1,0 +1,20 @@
+{
+  "artifact_stats": {
+    "counter_pairs": 20884,
+    "num_champions": 172,
+    "synergy_pairs": 17422
+  },
+  "config": {
+    "min_samples": 5,
+    "smoothing": "role=Beta(5.0,5.0), pair=Beta(10.0,10.0)"
+  },
+  "data_quality": {
+    "malformed_count": 0,
+    "skipped_pct": 0.0
+  },
+  "rows_count": 70310,
+  "run_id": "2026-01-25_17-34-48",
+  "source": "/backend/data/parsed",
+  "timestamp": 1769391288.976307,
+  "version": "v1.0.0"
+}

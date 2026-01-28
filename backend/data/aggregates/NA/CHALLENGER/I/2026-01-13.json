@@ -1,0 +1,998 @@
+{
+    "date": "2026-01-13",
+    "region": "NA",
+    "tier": "CHALLENGER",
+    "division": "I",
+    "metrics": [
+        "wins",
+        "games"
+    ],
+    "stats": {
+        "Kled": {
+            "wins": 1,
+            "games": 2,
+            "roles": {
+                "top": {
+                    "wins": 1,
+                    "games": 2
+                }
+            },
+            "synergy": {
+                "Naafiri": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Yone": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Twitch": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Nautilus": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Briar": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Zed": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Kayle": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Thresh": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Gnar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Khazix": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Pyke": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Mel": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Rell": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Azir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Evelynn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Vladimir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Caitlyn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Janna": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        },
+        "Naafiri": {
+            "wins": 1,
+            "games": 1,
+            "roles": {
+                "jungle": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Kled": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Yone": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Twitch": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Nautilus": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Gnar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Khazix": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Pyke": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Mel": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Rell": {
+                    "wins": 1,
+                    "games": 1
+                }
+            }
+        },
+        "Yone": {
+            "wins": 1,
+            "games": 1,
+            "roles": {
+                "mid": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Kled": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Naafiri": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Twitch": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Nautilus": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Gnar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Khazix": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Pyke": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Mel": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Rell": {
+                    "wins": 1,
+                    "games": 1
+                }
+            }
+        },
+        "Twitch": {
+            "wins": 1,
+            "games": 1,
+            "roles": {
+                "adc": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Kled": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Naafiri": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Yone": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Nautilus": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Gnar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Khazix": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Pyke": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Mel": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Rell": {
+                    "wins": 1,
+                    "games": 1
+                }
+            }
+        },
+        "Nautilus": {
+            "wins": 1,
+            "games": 1,
+            "roles": {
+                "support": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Kled": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Naafiri": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Yone": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Twitch": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Gnar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Khazix": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Pyke": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Mel": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Rell": {
+                    "wins": 1,
+                    "games": 1
+                }
+            }
+        },
+        "Gnar": {
+            "wins": 0,
+            "games": 1,
+            "roles": {
+                "top": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Khazix": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Pyke": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Mel": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Rell": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Naafiri": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Yone": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Twitch": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Nautilus": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        },
+        "Khazix": {
+            "wins": 0,
+            "games": 1,
+            "roles": {
+                "jungle": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Gnar": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Pyke": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Mel": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Rell": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Naafiri": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Yone": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Twitch": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Nautilus": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        },
+        "Pyke": {
+            "wins": 0,
+            "games": 1,
+            "roles": {
+                "mid": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Gnar": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Khazix": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Mel": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Rell": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Naafiri": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Yone": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Twitch": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Nautilus": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        },
+        "Mel": {
+            "wins": 0,
+            "games": 1,
+            "roles": {
+                "adc": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Gnar": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Khazix": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Pyke": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Rell": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Naafiri": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Yone": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Twitch": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Nautilus": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        },
+        "Rell": {
+            "wins": 0,
+            "games": 1,
+            "roles": {
+                "support": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Gnar": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Khazix": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Pyke": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Mel": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Naafiri": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Yone": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Twitch": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Nautilus": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        },
+        "Azir": {
+            "wins": 1,
+            "games": 1,
+            "roles": {
+                "top": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Evelynn": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Vladimir": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Caitlyn": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Janna": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Briar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Zed": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Kayle": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Thresh": {
+                    "wins": 1,
+                    "games": 1
+                }
+            }
+        },
+        "Evelynn": {
+            "wins": 1,
+            "games": 1,
+            "roles": {
+                "jungle": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Azir": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Vladimir": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Caitlyn": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Janna": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Briar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Zed": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Kayle": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Thresh": {
+                    "wins": 1,
+                    "games": 1
+                }
+            }
+        },
+        "Vladimir": {
+            "wins": 1,
+            "games": 1,
+            "roles": {
+                "mid": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Azir": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Evelynn": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Caitlyn": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Janna": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Briar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Zed": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Kayle": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Thresh": {
+                    "wins": 1,
+                    "games": 1
+                }
+            }
+        },
+        "Caitlyn": {
+            "wins": 1,
+            "games": 1,
+            "roles": {
+                "adc": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Azir": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Evelynn": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Vladimir": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Janna": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Briar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Zed": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Kayle": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Thresh": {
+                    "wins": 1,
+                    "games": 1
+                }
+            }
+        },
+        "Janna": {
+            "wins": 1,
+            "games": 1,
+            "roles": {
+                "support": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Azir": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Evelynn": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Vladimir": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Caitlyn": {
+                    "wins": 1,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Kled": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Briar": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Zed": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Kayle": {
+                    "wins": 1,
+                    "games": 1
+                },
+                "Thresh": {
+                    "wins": 1,
+                    "games": 1
+                }
+            }
+        },
+        "Briar": {
+            "wins": 0,
+            "games": 1,
+            "roles": {
+                "jungle": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Kled": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Zed": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Kayle": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Thresh": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Azir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Evelynn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Vladimir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Caitlyn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Janna": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        },
+        "Zed": {
+            "wins": 0,
+            "games": 1,
+            "roles": {
+                "mid": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Kled": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Briar": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Kayle": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Thresh": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Azir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Evelynn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Vladimir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Caitlyn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Janna": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        },
+        "Kayle": {
+            "wins": 0,
+            "games": 1,
+            "roles": {
+                "adc": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Kled": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Briar": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Zed": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Thresh": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Azir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Evelynn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Vladimir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Caitlyn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Janna": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        },
+        "Thresh": {
+            "wins": 0,
+            "games": 1,
+            "roles": {
+                "support": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "synergy": {
+                "Kled": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Briar": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Zed": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Kayle": {
+                    "wins": 0,
+                    "games": 1
+                }
+            },
+            "counter": {
+                "Azir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Evelynn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Vladimir": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Caitlyn": {
+                    "wins": 0,
+                    "games": 1
+                },
+                "Janna": {
+                    "wins": 0,
+                    "games": 1
+                }
+            }
+        }
+    }
+}

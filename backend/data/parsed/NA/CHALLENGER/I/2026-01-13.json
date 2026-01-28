@@ -1,0 +1,51 @@
+[
+  {
+    "match_id": "NA1_5463405967",
+    "day": "2026-01-13",
+    "patch": "16.1",
+    "tier": "CHALLENGER",
+    "division": "I",
+    "blue_team": "[{\"c\": \"Kled\", \"r\": \"top\"}, {\"c\": \"Naafiri\", \"r\": \"jungle\"}, {\"c\": \"Yone\", \"r\": \"mid\"}, {\"c\": \"Twitch\", \"r\": \"adc\"}, {\"c\": \"Nautilus\", \"r\": \"support\"}]",
+    "red_team": "[{\"c\": \"Gnar\", \"r\": \"top\"}, {\"c\": \"Khazix\", \"r\": \"jungle\"}, {\"c\": \"Pyke\", \"r\": \"mid\"}, {\"c\": \"Mel\", \"r\": \"adc\"}, {\"c\": \"Rell\", \"r\": \"support\"}]",
+    "blue_bans": [
+      "Talon",
+      "Riven",
+      "RekSai",
+      "Fiora",
+      "Malphite"
+    ],
+    "red_bans": [
+      "Graves",
+      "Akali",
+      "Sylas",
+      "Zed",
+      "Thresh"
+    ],
+    "winner": "BLUE",
+    "region": "NA"
+  },
+  {
+    "match_id": "NA1_5463373855",
+    "day": "2026-01-13",
+    "patch": "16.1",
+    "tier": "CHALLENGER",
+    "division": "I",
+    "blue_team": "[{\"c\": \"Azir\", \"r\": \"top\"}, {\"c\": \"Evelynn\", \"r\": \"jungle\"}, {\"c\": \"Vladimir\", \"r\": \"mid\"}, {\"c\": \"Caitlyn\", \"r\": \"adc\"}, {\"c\": \"Janna\", \"r\": \"support\"}]",
+    "red_team": "[{\"c\": \"Kled\", \"r\": \"top\"}, {\"c\": \"Briar\", \"r\": \"jungle\"}, {\"c\": \"Zed\", \"r\": \"mid\"}, {\"c\": \"Kayle\", \"r\": \"adc\"}, {\"c\": \"Thresh\", \"r\": \"support\"}]",
+    "blue_bans": [
+      "Sona",
+      "Fiddlesticks",
+      "Draven",
+      "Kassadin",
+      "Jayce"
+    ],
+    "red_bans": [
+      "Belveth",
+      "Riven",
+      "Mel",
+      "Draven"
+    ],
+    "winner": "BLUE",
+    "region": "NA"
+  }
+]
