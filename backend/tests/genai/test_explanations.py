@@ -51,3 +51,19 @@ def test_generate_ai_explanation_failure(mock_get_client):
 
     # Should fall back to basic builder
     assert result == "Ahri: Reason 1"
+
+
+@patch("app.config.settings.settings")
+@patch("app.genai.explanations.get_client")
+def test_generate_ai_explanation_no_api_key(mock_get_client, mock_settings):
+    """Test fallback when API key is missing."""
+    # Simulate missing API key
+    mock_settings.genai.api_key = ""
+
+    result = generate_ai_explanation(champion="Ahri", allies=[], enemies=[], reasons=["Reason 1"])
+
+    # Should match fallback explanation format
+    assert result == "Ahri: Reason 1"
+
+    # Should NOT attempt to get client
+    mock_get_client.assert_not_called()
