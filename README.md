@@ -48,7 +48,7 @@ cd LoL-Coach
 
 > **Note:** Includes pre-built demo artifacts (small sample) so it runs out-of-the-box. For stronger recommendations, ingest more matches and rebuild artifacts.
 > *   **No Riot Key needed** (unless you want to ingest fresh data).
-> *   **No Gemini Key needed** (you'll get standard explanations instead of AI-generated ones).
+> *   **No LLM API Key needed** (you'll get standard explanations instead of AI-generated ones).
 
 ---
 
@@ -94,8 +94,8 @@ graph TD
         req(User Draft) --> API[FastAPI Endpoint]
         E -.->|Load| Model[Model Registry]
         Model -->|Score| API
-        API -->|Context| Gemini[Gemini 3 Flash Preview]
-        Gemini -->|Commentary| res(Final Response)
+        API -->|Context| LLM[LLM (Gemini / OpenAI)]
+        LLM -->|Commentary| res(Final Response)
     end
 ```
 
@@ -188,12 +188,12 @@ A `config.yml` file at the root manages development settings (ports, test covera
 *   **Frontend**: `NEXT_PUBLIC_BACKEND_URL` (Defaults to localhost).
 *   **Backend**: 
     *   `RIOT_API_KEY`: Required for fetching new data.
-    *   `GEMINI_API_KEY`: Required for generating LLM explanations.
+    *   `GEMINI_API_KEY` / `OPENAI_API_KEY`: Required for generating LLM explanations (depending on `GENAI_PROVIDER`).
     *   `PORT`: Port configuration.
 
 ### Data & Patch
 *   **DataDragon**: Champion metadata + images are loaded from Riot DataDragon for a configured patch version (currently 14.24.1).
-*   **GenAI**: Hooks (`app/genai`) are available for LLM integration (Google Gemini), though optional for the MVP.
+*   **GenAI**: Hooks (`backend/app/genai`) are available for LLM integration (Google Gemini / OpenAI), though optional for the MVP.
 
 ---
 
@@ -224,7 +224,7 @@ LoL Coach/
 │   │   ├── api/            # FastAPI Routers (v1)
 │   │   ├── config/         # App Configuration
 │   │   ├── domain/         # Business Logic & Enums
-│   │   ├── genai/          # LLM Integration (Gemini)
+│   │   ├── genai/          # LLM Integration (Gemini / OpenAI)
 │   │   ├── ingest/         # Ingestion Pipeline (Strategy Pattern)
 │   │   ├── ml/             # Additive Lift Model & Artifacts
 │   │   ├── riot_accessor/  # Resilient Riot API Client
