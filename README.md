@@ -94,7 +94,7 @@ graph TD
         req(User Draft) --> API[FastAPI Endpoint]
         E -.->|Load| Model[Model Registry]
         Model -->|Score| API
-        API -->|Context| Gemini[Gemini 1.5 Flash]
+        API -->|Context| Gemini[Gemini 3 Flash Preview]
         Gemini -->|Commentary| res(Final Response)
     end
 ```
