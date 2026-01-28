@@ -109,14 +109,14 @@ graph TD
 
     The scoring engine uses an **Additive Lift Model** to ensure interpretability. Unlike "black box" neural networks, every percentage point in the final score can be traced back to a specific synergy or counter relationship.
 
-    $$P(\text{Win} | \text{Draft}) \approx P_{\text{base}} + \sum \text{Lift}_{\text{synergy}} + \sum \text{Lift}_{\text{counter}}$$
+    $P(Win \mid Draft) \approx P_{base} + \sum Lift_{synergy} + \sum Lift_{counter}$
 
     Where:
-    *   $P_{\text{base}}$ is the champion's baseline winrate in the target role.
-    *   $\text{Lift}_{\text{synergy}}$ is the probability delta ($P(\text{Win}|\text{Teammate}) - P_{\text{base}}$).
-    *   $\text{Lift}_{\text{counter}}$ is the probability delta ($P(\text{Win}|\text{Enemy}) - P_{\text{base}}$).
+    *   $P_{base}$ is the champion's baseline winrate in the target role.
+    *   $Lift_{synergy}$ is the probability delta ($P(Win \mid Teammate) - P_{base}$).
+    *   $Lift_{counter}$ is the probability delta ($P(Win \mid Enemy) - P_{base}$).
 
-5.  **Explain**: Returns the "Why" (e.g., "+4% winrate with Jinx").
+6.  **Explain**: Returns the "Why" (e.g., "+4% winrate with Jinx").
 
 ---
 
