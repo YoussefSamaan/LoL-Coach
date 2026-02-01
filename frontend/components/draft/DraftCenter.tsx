@@ -42,7 +42,7 @@ export const DraftCenter: React.FC<DraftCenterProps> = ({
                 ) : recommendations.length === 0 ? (
                     <DraftEmptyState />
                 ) : (
-                    recommendations.slice(0, 3).map((rec, i) => (
+                    recommendations.map((rec, i) => (
                         <RecommendationCard
                             key={rec.championId}
                             rec={rec}
@@ -53,7 +53,7 @@ export const DraftCenter: React.FC<DraftCenterProps> = ({
 
                 {recommendations.length > 0 && (
                     <div className="text-center pb-4 pt-2">
-                        <span className="text-[10px] text-slate-600 uppercase tracking-widest">Showing Top 3 Recommendations</span>
+                        <span className="text-[10px] text-slate-600 uppercase tracking-widest">Showing Top {recommendations.length} Recommendations</span>
                     </div>
                 )}
             </div>

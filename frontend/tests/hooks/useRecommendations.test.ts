@@ -123,7 +123,7 @@ describe('useRecommendations', () => {
             allies: [],
             enemies: [],
             bans: [],
-            top_k: 3
+            top_k: 5
         };
 
         const callArgs = mockFetch.mock.calls[0];
