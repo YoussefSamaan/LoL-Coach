@@ -5,12 +5,14 @@ export const useSystemStatus = () => {
     const [version, setVersion] = useState('v0.0.0');
 
     useEffect(() => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/health`)
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+
+        fetch(`${backendUrl}/health`)
             .then(res => res.json())
             .then(data => setSystemStatus(data.status === 'ok' ? 'ONLINE' : 'OFFLINE'))
             .catch(() => setSystemStatus('OFFLINE'));
 
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/version`)
+        fetch(`${backendUrl}/version`)
             .then(res => res.json())
             .then(data => setVersion(`v${data.version}`))
             .catch(() => { });

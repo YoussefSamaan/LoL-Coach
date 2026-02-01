@@ -43,7 +43,7 @@ export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<R
                     allies: cleanAllies,
                     enemies: cleanEnemies,
                     bans: cleanBans,
-                    top_k: 10
+                    top_k: 3
                 })
             });
 
