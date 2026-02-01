@@ -15,7 +15,27 @@ class TestMain:
     def test_version(self, client):
         r = client.get("/version")
         assert r.status_code == 200
-        assert r.json() == {"version": "0.1.0"}
+        data = r.json()
+        assert "version" in data
+        assert "run_id" in data
+        # Should have either actual version info or fallback
+        assert data["version"] is not None
+
+    def test_version_fallback_no_registry(self, client):
+        """Test /version endpoint when no model registry exists."""
+        from unittest.mock import patch, MagicMock
+
+        # Patch where ModelRegistry is imported (inside the version function)
+        with patch("app.services.model_registry.ModelRegistry") as mock_registry_class:
+            mock_registry = MagicMock()
+            mock_registry.get_current_version.return_value = None
+            mock_registry_class.return_value = mock_registry
+
+            r = client.get("/version")
+            assert r.status_code == 200
+            data = r.json()
+            assert data["version"] == "0.1.0"
+            assert data["run_id"] == "unknown"
 
     def test_openapi_contains_v1_routes(self, client):
         """
