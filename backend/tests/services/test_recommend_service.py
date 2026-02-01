@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch, AsyncMock
 
 from app.services.recommend_service import RecommendService
 from app.ml.scoring import ScoringConfig
@@ -86,3 +86,30 @@ async def test_recommend_draft_empty_pool(mock_registry):
 
     resp = await service.recommend_draft(payload)
     assert len(resp.recommendations) == 0
+
+
+@pytest.mark.asyncio
+async def test_recommend_draft_with_ai_explanations(mock_registry):
+    """Test that AI explanations are used when API key is present."""
+    config = ScoringConfig()
+    service = RecommendService(registry=mock_registry, config=config)
+
+    payload = RecommendDraftRequest(role=Role.TOP, allies=["Ahri"], enemies=["Darius"], bans=[])
+
+    # Mock settings to have an API key
+    with patch("app.services.recommend_service.settings") as mock_settings:
+        mock_settings.genai.api_key = "test-api-key"
+
+        # Mock the AI explanation function
+        with patch(
+            "app.services.recommend_service.agenerate_ai_explanation", new_callable=AsyncMock
+        ) as mock_ai:
+            mock_ai.return_value = "AI generated explanation for this champion"
+
+            resp = await service.recommend_draft(payload)
+
+            # Verify AI explanation was called
+            assert mock_ai.called
+            # Verify response has explanations
+            assert len(resp.recommendations) > 0
+            assert "AI generated" in resp.recommendations[0].explanation
