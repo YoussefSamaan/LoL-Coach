@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 
-from app.genai.explanations import generate_ai_explanation
+from app.genai.explanations import agenerate_ai_explanation
 from app.ml.scoring import ScoringConfig, score_candidate
 from app.schemas.recommend import RecommendDraftRequest, RecommendDraftResponse, Recommendation
 from app.services.model_registry import ModelRegistry
@@ -13,7 +14,7 @@ class RecommendService:
     registry: ModelRegistry
     config: ScoringConfig
 
-    def recommend_draft(self, payload: RecommendDraftRequest) -> RecommendDraftResponse:
+    async def recommend_draft(self, payload: RecommendDraftRequest) -> RecommendDraftResponse:
         bundle = self.registry.load_latest()
 
         # Infer valid champions from role_strength stats
@@ -42,19 +43,30 @@ class RecommendService:
             scored.append((candidate, score, reasons))
 
         scored.sort(key=lambda x: x[1], reverse=True)
+
+        top_candidates = scored[: payload.top_k]
+
+        # Parallel explanation generation
+        explanation_tasks = [
+            agenerate_ai_explanation(
+                champion=champion,
+                allies=payload.allies,
+                enemies=payload.enemies,
+                reasons=reasons,
+            )
+            for champion, score, reasons in top_candidates
+        ]
+
+        explanations = await asyncio.gather(*explanation_tasks)
+
         recs = [
             Recommendation(
                 champion=champion,
                 score=score,
                 reasons=reasons,
-                explanation=generate_ai_explanation(
-                    champion=champion,
-                    allies=payload.allies,
-                    enemies=payload.enemies,
-                    reasons=reasons,
-                ),
+                explanation=explanation,
             )
-            for champion, score, reasons in scored[: payload.top_k]
+            for (champion, score, reasons), explanation in zip(top_candidates, explanations)
         ]
 
         return RecommendDraftResponse(

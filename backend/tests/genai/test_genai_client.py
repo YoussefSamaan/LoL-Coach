@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from app.genai.client import GeminiClient, OpenAIClient, get_client
@@ -63,6 +63,51 @@ def test_gemini_client_generate_error(mock_settings, mock_genai):
 
     with pytest.raises(RuntimeError, match="Gemini generation failed"):
         client.generate("test prompt")
+
+
+@pytest.mark.asyncio
+@patch("app.genai.client.genai")
+@patch("app.genai.client.settings")
+async def test_gemini_client_agenerate(mock_settings, mock_genai):
+    """Test generating content using GeminiClient async."""
+    mock_settings.genai.gemini_api_key = "test_key"
+    mock_settings.genai.gemini_model = "test_model"
+
+    mock_client_instance = MagicMock()
+    mock_response = MagicMock()
+    mock_response.text = "Generated explanation"
+
+    # Mock the async call
+    mock_client_instance.aio.models.generate_content = AsyncMock(return_value=mock_response)
+    mock_genai.Client.return_value = mock_client_instance
+
+    client = GeminiClient()
+    response = await client.agenerate("test prompt")
+
+    assert response == "Generated explanation"
+    mock_client_instance.aio.models.generate_content.assert_called_with(
+        model="test_model", contents="test prompt"
+    )
+
+
+@pytest.mark.asyncio
+@patch("app.genai.client.genai")
+@patch("app.genai.client.settings")
+async def test_gemini_client_agenerate_error(mock_settings, mock_genai):
+    """Test handling of async generation errors."""
+    mock_settings.genai.gemini_api_key = "test_key"
+    mock_settings.genai.gemini_model = "test_model"
+
+    mock_client_instance = MagicMock()
+    mock_client_instance.aio.models.generate_content = AsyncMock(
+        side_effect=Exception("Async API Error")
+    )
+    mock_genai.Client.return_value = mock_client_instance
+
+    client = GeminiClient()
+
+    with pytest.raises(RuntimeError, match="Gemini async generation failed"):
+        await client.agenerate("test prompt")
 
 
 # --- OpenAI Tests ---
@@ -131,6 +176,58 @@ def test_openai_client_generate_error(mock_settings, mock_openai):
 
     with pytest.raises(RuntimeError, match="OpenAI generation failed"):
         client.generate("test prompt")
+
+
+@pytest.mark.asyncio
+@patch("app.genai.client.openai")
+@patch("app.genai.client.settings")
+async def test_openai_client_agenerate(mock_settings, mock_openai):
+    """Test generating content using OpenAIClient async."""
+    mock_settings.genai.openai_api_key = "test_key_oa"
+    mock_settings.genai.openai_model = "gpt-4o-mini"
+
+    mock_client_instance = MagicMock()  # This is the sync one
+    mock_async_client_instance = MagicMock()  # This is the async one
+
+    mock_response = MagicMock()
+    mock_choice = MagicMock()
+    mock_choice.message.content = "OpenAI async explanation"
+    mock_response.choices = [mock_choice]
+
+    mock_async_client_instance.chat.completions.create = AsyncMock(return_value=mock_response)
+
+    # Setup mock_openai to return appropriate clients
+    mock_openai.OpenAI.return_value = mock_client_instance
+    mock_openai.AsyncOpenAI.return_value = mock_async_client_instance
+
+    client = OpenAIClient()
+    response = await client.agenerate("test prompt")
+
+    assert response == "OpenAI async explanation"
+    mock_async_client_instance.chat.completions.create.assert_called_with(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "test prompt"}],
+    )
+
+
+@pytest.mark.asyncio
+@patch("app.genai.client.openai")
+@patch("app.genai.client.settings")
+async def test_openai_client_agenerate_error(mock_settings, mock_openai):
+    """Test handling of async generation errors for OpenAI."""
+    mock_settings.genai.openai_api_key = "test_key_oa"
+    mock_settings.genai.openai_model = "gpt-4o-mini"
+
+    mock_async_client_instance = MagicMock()
+    mock_async_client_instance.chat.completions.create = AsyncMock(
+        side_effect=Exception("OpenAI Async API Error")
+    )
+    mock_openai.AsyncOpenAI.return_value = mock_async_client_instance
+
+    client = OpenAIClient()
+
+    with pytest.raises(RuntimeError, match="OpenAI async generation failed"):
+        await client.agenerate("test prompt")
 
 
 # --- Factory Tests ---

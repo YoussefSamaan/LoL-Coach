@@ -30,8 +30,9 @@ def mock_registry():
     return registry
 
 
-@patch("app.services.recommend_service.generate_ai_explanation")
-def test_recommend_draft_basic(mock_genai, mock_registry):
+@patch("app.services.recommend_service.agenerate_ai_explanation")
+@pytest.mark.asyncio
+async def test_recommend_draft_basic(mock_genai, mock_registry):
     mock_genai.side_effect = lambda champion, **kwargs: f"Mock explanation for {champion}"
     config = ScoringConfig()
 
@@ -41,7 +42,7 @@ def test_recommend_draft_basic(mock_genai, mock_registry):
         role=Role.TOP, allies=["Ahri"], enemies=["Darius"], bans=["Teemo"]
     )
 
-    resp = service.recommend_draft(payload)
+    resp = await service.recommend_draft(payload)
 
     assert resp.role == Role.TOP
     assert len(resp.recommendations) > 0
@@ -56,8 +57,9 @@ def test_recommend_draft_basic(mock_genai, mock_registry):
     assert f"Mock explanation for {top_rec.champion}" == top_rec.explanation
 
 
-@patch("app.services.recommend_service.generate_ai_explanation")
-def test_recommend_draft_filtering(mock_genai, mock_registry):
+@patch("app.services.recommend_service.agenerate_ai_explanation")
+@pytest.mark.asyncio
+async def test_recommend_draft_filtering(mock_genai, mock_registry):
     mock_genai.return_value = "Mock explanation"
     # Filter out taken champs
     config = ScoringConfig()
@@ -66,14 +68,15 @@ def test_recommend_draft_filtering(mock_genai, mock_registry):
     # Assuming Riven is banned
     payload = RecommendDraftRequest(role=Role.TOP, allies=[], enemies=[], bans=["Riven"])
 
-    resp = service.recommend_draft(payload)
+    resp = await service.recommend_draft(payload)
     champs = [r.champion for r in resp.recommendations]
     assert "Riven" not in champs
     assert "Aatrox" in champs
 
 
-@patch("app.services.recommend_service.generate_ai_explanation")
-def test_recommend_draft_empty_pool(mock_genai, mock_registry):
+@patch("app.services.recommend_service.agenerate_ai_explanation")
+@pytest.mark.asyncio
+async def test_recommend_draft_empty_pool(mock_genai, mock_registry):
     mock_genai.return_value = "Mock explanation"
     # Request for a role with no stats
     config = ScoringConfig()
@@ -86,5 +89,5 @@ def test_recommend_draft_empty_pool(mock_genai, mock_registry):
         bans=[],
     )
 
-    resp = service.recommend_draft(payload)
+    resp = await service.recommend_draft(payload)
     assert len(resp.recommendations) == 0

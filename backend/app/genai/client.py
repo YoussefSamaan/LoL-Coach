@@ -12,7 +12,20 @@ class LLMClient(ABC):
     @abstractmethod
     def generate(self, prompt: str) -> str:
         """
-        Generate text response for a given prompt.
+        Generate text response for a given prompt (synchronous).
+
+        Args:
+            prompt: Reduced prompt string.
+
+        Returns:
+            The generated text.
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
+    async def agenerate(self, prompt: str) -> str:
+        """
+        Generate text response for a given prompt (asynchronous).
 
         Args:
             prompt: Reduced prompt string.
@@ -43,6 +56,15 @@ class GeminiClient(LLMClient):
             # Wrap or re-raise exceptions specific to the provider
             raise RuntimeError(f"Gemini generation failed: {e}") from e
 
+    async def agenerate(self, prompt: str) -> str:
+        try:
+            response = await self.client.aio.models.generate_content(
+                model=self.model, contents=prompt
+            )
+            return response.text or ""
+        except Exception as e:
+            raise RuntimeError(f"Gemini async generation failed: {e}") from e
+
 
 class OpenAIClient(LLMClient):
     """OpenAI implementation of LLMClient."""
@@ -52,6 +74,7 @@ class OpenAIClient(LLMClient):
             raise ValueError("OPENAI_API_KEY is not set.")
 
         self.client = openai.OpenAI(api_key=settings.genai.openai_api_key)
+        self.async_client = openai.AsyncOpenAI(api_key=settings.genai.openai_api_key)
         self.model = settings.genai.openai_model
 
     def generate(self, prompt: str) -> str:
@@ -63,6 +86,16 @@ class OpenAIClient(LLMClient):
             return response.choices[0].message.content or ""
         except Exception as e:
             raise RuntimeError(f"OpenAI generation failed: {e}") from e
+
+    async def agenerate(self, prompt: str) -> str:
+        try:
+            response = await self.async_client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return response.choices[0].message.content or ""
+        except Exception as e:
+            raise RuntimeError(f"OpenAI async generation failed: {e}") from e
 
 
 def get_client(provider: str | None = None) -> LLMClient:

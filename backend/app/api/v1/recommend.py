@@ -22,8 +22,8 @@ def get_recommend_service(
 
 
 @router.post("/recommend/draft", response_model=RecommendDraftResponse)
-def recommend_draft(
+async def recommend_draft(
     payload: RecommendDraftRequest,
     service: RecommendService = Depends(get_recommend_service),
 ) -> RecommendDraftResponse:
-    return service.recommend_draft(payload)
+    return await service.recommend_draft(payload)

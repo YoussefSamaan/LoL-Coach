@@ -35,15 +35,44 @@ def generate_ai_explanation(
 
     try:
         client = get_client()
-        # specific prompt construction could happen here or in prompts.py
-        # extending DraftPrompts to accept reasons would be good.
-        # For now, let's just use the basic one.
-        prompt = DraftPrompts.simple_explanation(champion, allies, enemies)
-        if reasons:
-            prompt += f"\nKey factors identified by model: {', '.join(reasons)}"
-
+        prompt = _build_prompt(champion, allies, enemies, reasons)
         return client.generate(prompt)
     except Exception as e:
         logger.error(f"Failed to generate AI explanation: {e}")
         # Fallback to simple construction
         return build_explanation(champion=champion, reasons=reasons or [])
+
+
+async def agenerate_ai_explanation(
+    champion: str, allies: list[str], enemies: list[str], reasons: list[str] | None = None
+) -> str:
+    """
+    Generate an explanation using GenAI (Gemini) asynchronously.
+
+    Args:
+        champion: Recommended champion name.
+        allies: List of ally champion names.
+        enemies: List of enemy champion names.
+        reasons: Optional list of heuristic reasons to incorporate.
+    """
+    from app.config.settings import settings
+
+    if not settings.genai.api_key:
+        return build_explanation(champion=champion, reasons=reasons or [])
+
+    try:
+        client = get_client()
+        prompt = _build_prompt(champion, allies, enemies, reasons)
+        return await client.agenerate(prompt)
+    except Exception as e:
+        logger.error(f"Failed to generate AI explanation asynchronously: {e}")
+        return build_explanation(champion=champion, reasons=reasons or [])
+
+
+def _build_prompt(
+    champion: str, allies: list[str], enemies: list[str], reasons: list[str] | None
+) -> str:
+    prompt = DraftPrompts.simple_explanation(champion, allies, enemies)
+    if reasons:
+        prompt += f"\nKey factors identified by model: {', '.join(reasons)}"
+    return prompt
