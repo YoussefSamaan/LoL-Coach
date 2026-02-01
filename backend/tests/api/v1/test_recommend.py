@@ -8,7 +8,9 @@ from app.ml.artifacts import ArtifactBundle
 from app.ml.training import ArtifactStats, ManifestData
 
 # We need to override the dependency directly
-from app.api.v1.recommend import get_model_registry
+from app.api.v1.recommend import get_recommend_service
+from app.services.recommend_service import RecommendService
+from app.ml.scoring import ScoringConfig
 
 client = TestClient(app)
 
@@ -35,8 +37,12 @@ def mock_registry_dependency():
 
 
 def test_recommend_endpoint_success(mock_registry_dependency):
+    # Create service with mock registry
+    config = ScoringConfig()
+    service = RecommendService(registry=mock_registry_dependency, config=config)
+
     # Override dependency
-    app.dependency_overrides[get_model_registry] = lambda: mock_registry_dependency
+    app.dependency_overrides[get_recommend_service] = lambda: service
 
     payload = {"role": "MID", "allies": ["Ashe"], "enemies": ["Zed"], "bans": []}
 

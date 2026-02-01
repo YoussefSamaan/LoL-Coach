@@ -152,24 +152,16 @@ class TestRecommendationSystemE2E:
         from app.services.recommend_service import RecommendService
         from app.ml.scoring import ScoringConfig
         from app.schemas.recommend import RecommendDraftRequest
-        from unittest.mock import AsyncMock
 
         scoring_config = ScoringConfig()
         service = RecommendService(registry=registry, config=scoring_config)
-
-        from unittest.mock import patch
 
         # Request recommendations for MID with Amumu as ally
         request = RecommendDraftRequest(
             role=Role.MID, allies=["Amumu"], enemies=["Zed"], bans=["Yasuo"], top_k=5
         )
 
-        with patch(
-            "app.services.recommend_service.agenerate_ai_explanation",
-            new_callable=AsyncMock,
-        ) as mock_agenerate:
-            mock_agenerate.return_value = "Mock Explanation"
-            response = await service.recommend_draft(request)
+        response = await service.recommend_draft(request)
 
         # Verify response structure
         assert response.role == Role.MID
