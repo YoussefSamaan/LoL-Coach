@@ -3,19 +3,37 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 
-from app.genai.explanations import agenerate_ai_explanation
+from app.config.settings import settings
+from app.genai.explanations import agenerate_ai_explanation, build_explanation
+from app.ml.artifacts import ArtifactBundle
 from app.ml.scoring import ScoringConfig, score_candidate
 from app.schemas.recommend import RecommendDraftRequest, RecommendDraftResponse, Recommendation
 from app.services.model_registry import ModelRegistry
 
 
-@dataclass(frozen=True)
+@dataclass
 class RecommendService:
     registry: ModelRegistry
     config: ScoringConfig
+    _bundle: ArtifactBundle | None = None
+    _cached_version: str | None = None
+
+    def get_bundle(self) -> ArtifactBundle:
+        """Get the artifact bundle, reloading only if the version has changed."""
+        current_version_info = self.registry.get_current_version()
+
+        # Determine current version identifier
+        current_version = current_version_info.run_id if current_version_info else None
+
+        # Reload if version changed or bundle not yet loaded
+        if self._bundle is None or self._cached_version != current_version:
+            self._bundle = self.registry.load_latest()
+            self._cached_version = current_version
+
+        return self._bundle
 
     async def recommend_draft(self, payload: RecommendDraftRequest) -> RecommendDraftResponse:
-        bundle = self.registry.load_latest()
+        bundle = self.get_bundle()
 
         # Infer valid champions from role_strength stats
         # bundle.stats is ArtifactStats (Pydantic model), access fields directly
@@ -46,18 +64,27 @@ class RecommendService:
 
         top_candidates = scored[: payload.top_k]
 
-        # Parallel explanation generation
-        explanation_tasks = [
-            agenerate_ai_explanation(
-                champion=champion,
-                allies=payload.allies,
-                enemies=payload.enemies,
-                reasons=reasons,
-            )
-            for champion, score, reasons in top_candidates
-        ]
+        # Use AI explanations if API key is available, otherwise use heuristic
 
-        explanations = await asyncio.gather(*explanation_tasks)
+        if settings.genai.api_key:
+            # Generate AI explanations asynchronously
+
+            explanation_tasks = [
+                agenerate_ai_explanation(
+                    champion=champion,
+                    allies=payload.allies,
+                    enemies=payload.enemies,
+                    reasons=reasons,
+                )
+                for champion, score, reasons in top_candidates
+            ]
+            explanations = await asyncio.gather(*explanation_tasks)
+        else:
+            # Use heuristic explanations (no AI)
+            explanations = [
+                build_explanation(champion=champion, reasons=reasons)
+                for champion, score, reasons in top_candidates
+            ]
 
         recs = [
             Recommendation(

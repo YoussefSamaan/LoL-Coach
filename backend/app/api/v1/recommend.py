@@ -2,23 +2,29 @@ from fastapi import APIRouter, Depends
 
 from app.ml.scoring import ScoringConfig
 from app.schemas.recommend import RecommendDraftRequest, RecommendDraftResponse
-from app.services.model_registry import ModelRegistry
 from app.services.recommend_service import RecommendService
 
 router = APIRouter()
 
 
-def get_model_registry() -> ModelRegistry:
-    return ModelRegistry()
+_service_instance: RecommendService | None = None
 
 
-def get_recommend_service(
-    registry: ModelRegistry = Depends(get_model_registry),
-) -> RecommendService:
-    # Use default ScoringConfig for now.
-    # In the future, we can load this from a specific model config file if needed.
-    config = ScoringConfig()
-    return RecommendService(registry=registry, config=config)
+def get_recommend_service() -> RecommendService:
+    """Get or create the singleton RecommendService instance.
+
+    The service maintains a cached model bundle and only reloads when
+    the artifact version changes (detected via ModelRegistry).
+    """
+    global _service_instance
+    if _service_instance is None:
+        # Import here to avoid circular dependency
+        from app.api.v1.router import get_registry
+
+        registry = get_registry()
+        config = ScoringConfig()
+        _service_instance = RecommendService(registry=registry, config=config)
+    return _service_instance
 
 
 @router.post("/recommend/draft", response_model=RecommendDraftResponse)
