@@ -14,4 +14,4 @@ frontend:
     lint: true
     type_check: true
     test: true
-  coverage_threshold: 80
+  coverage_threshold: 100
