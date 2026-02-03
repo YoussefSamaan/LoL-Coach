@@ -18,4 +18,5 @@ export interface Recommendation {
     score: number;
     primaryReason: string;
     explanation?: string;
+    reasons?: string[];
 }

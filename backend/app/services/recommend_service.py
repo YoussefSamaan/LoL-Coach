@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 from dataclasses import dataclass
 
-from app.config.settings import settings
-from app.genai.explanations import agenerate_ai_explanation, build_explanation
 from app.ml.artifacts import ArtifactBundle
 from app.ml.scoring import ScoringConfig, score_candidate
 from app.schemas.recommend import RecommendDraftRequest, RecommendDraftResponse, Recommendation
@@ -64,36 +61,15 @@ class RecommendService:
 
         top_candidates = scored[: payload.top_k]
 
-        # Use AI explanations if API key is available, otherwise use heuristic
-
-        if settings.genai.api_key:
-            # Generate AI explanations asynchronously
-
-            explanation_tasks = [
-                agenerate_ai_explanation(
-                    champion=champion,
-                    allies=payload.allies,
-                    enemies=payload.enemies,
-                    reasons=reasons,
-                )
-                for champion, score, reasons in top_candidates
-            ]
-            explanations = await asyncio.gather(*explanation_tasks)
-        else:
-            # Use heuristic explanations (no AI)
-            explanations = [
-                build_explanation(champion=champion, reasons=reasons)
-                for champion, score, reasons in top_candidates
-            ]
-
+        # Return recommendations without explanations (use /explain endpoint for those)
         recs = [
             Recommendation(
                 champion=champion,
                 score=score,
                 reasons=reasons,
-                explanation=explanation,
+                explanation="",  # Empty - use /v1/explain/draft for AI explanations
             )
-            for (champion, score, reasons), explanation in zip(top_candidates, explanations)
+            for champion, score, reasons in top_candidates
         ]
 
         return RecommendDraftResponse(

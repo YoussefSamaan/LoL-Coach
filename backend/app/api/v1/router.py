@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.v1.explain import router as explain_router
 from app.api.v1.recommend import router as recommend_router
 from app.services.model_registry import ModelRegistry
 
@@ -39,3 +40,4 @@ def version() -> dict:
 
 
 router.include_router(recommend_router, tags=["recommend"])
+router.include_router(explain_router, tags=["explain"])

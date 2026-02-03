@@ -233,10 +233,19 @@ def score_candidate(
 
     # 6. Build explanation
     reasons.append(f"Base Winrate: {role_winrate:.1%}")
-    if abs(synergy_score) > 0.005:
-        reasons.append(f"Synergy Lift: {synergy_score:+.1%}")
-    if abs(counter_score) > 0.005:
-        reasons.append(f"Counter Lift: {counter_score:+.1%}")
+
+    # Granular Synergy Reasons
+    for ally, lift in zip(allies, synergy_lifts):
+        if abs(lift) >= 0.01:  # Only mention if impact is >= 1%
+            reasons.append(f"Synergy w/ {ally}: {lift:+.1%}")
+
+    # Granular Counter Reasons
+    for enemy, lift in zip(enemies, counter_lifts):
+        if lift >= 0.01:
+            reasons.append(f"Good vs {enemy}: {lift:+.1%}")
+        elif lift <= -0.01:
+            reasons.append(f"Bad vs {enemy}: {lift:+.1%}")
+
     reasons.append(f"Final Prob: {final_prob:.1%}")
 
     return final_prob, reasons

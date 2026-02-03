@@ -52,6 +52,18 @@ describe('Home Page', () => {
                     })
                 };
             }
+            if (url.includes('/explain/draft')) {
+                return {
+                    ok: true,
+                    json: async () => ({
+                        explanations: [
+                            { champion: 'Garen', explanation: 'Solid tank for your team' },
+                            { champion: 'Darius', explanation: 'Strong lane presence' },
+                            { champion: 'Mordekaiser', explanation: 'AP damage dealer' }
+                        ]
+                    })
+                };
+            }
             return {
                 ok: true,
                 json: async () => ({})

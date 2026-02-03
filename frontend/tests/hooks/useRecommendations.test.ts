@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useRecommendations } from '@/hooks/useRecommendations';
 import { Role } from '@/types';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -33,12 +33,23 @@ describe('useRecommendations', () => {
         expect(result.current.error).toBeNull();
     });
 
-    it('predicts and sets recommendations', async () => {
+    it('predicts and sets recommendations, then fetches explanations', async () => {
+        // Mock recommend endpoint
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => ({
                 recommendations: [
                     { champion: 'Ahri', score: 0.85, reasons: ['Synergy'] }
+                ]
+            })
+        });
+
+        // Mock explain endpoint
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                explanations: [
+                    { champion: 'Ahri', explanation: 'Great pick!' }
                 ]
             })
         });
@@ -49,12 +60,29 @@ describe('useRecommendations', () => {
             await result.current.handlePredict();
         });
 
+        // First, recommendations should be loaded without explanations
         expect(result.current.loading).toBe(false);
         expect(result.current.recommendations).toHaveLength(1);
         expect(result.current.recommendations[0].championName).toBe('Ahri');
         expect(result.current.recommendations[0].score).toBe(85); // 0.85 * 100
-        expect(mockFetch).toHaveBeenCalledWith(
+
+        // Wait for explanations to be fetched
+        await waitFor(() => {
+            expect(result.current.recommendations[0].explanation).toBe('Great pick!');
+        });
+
+        expect(mockFetch).toHaveBeenCalledTimes(2);
+        expect(mockFetch).toHaveBeenNthCalledWith(
+            1,
             expect.stringContaining('/v1/recommend/draft'),
+            expect.objectContaining({
+                method: 'POST',
+                body: expect.any(String)
+            })
+        );
+        expect(mockFetch).toHaveBeenNthCalledWith(
+            2,
+            expect.stringContaining('/v1/explain/draft'),
             expect.objectContaining({
                 method: 'POST',
                 body: expect.any(String)
@@ -72,6 +100,12 @@ describe('useRecommendations', () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => ({ recommendations: [] })
+        });
+
+        // Mock explain endpoint (won't be called for empty recommendations)
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ explanations: [] })
         });
 
         const { result } = renderHook(() => useRecommendations(draftWithFilledRole, mockSetDraft, mockChampions));
@@ -112,6 +146,11 @@ describe('useRecommendations', () => {
             json: async () => ({ recommendations: [] })
         });
 
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ explanations: [] })
+        });
+
         const { result } = renderHook(() => useRecommendations(defaultDraft, mockSetDraft, mockChampions));
 
         await act(async () => {
@@ -123,12 +162,80 @@ describe('useRecommendations', () => {
             allies: [],
             enemies: [],
             bans: [],
-            top_k: 5
+            top_k: 3
         };
 
         const callArgs = mockFetch.mock.calls[0];
         const requestBody = JSON.parse(callArgs[1].body);
 
         expect(requestBody).toEqual(expectedPayload);
+    });
+
+    it('handles explanation fetch failure gracefully', async () => {
+        // Mock recommend endpoint (success)
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                recommendations: [
+                    { champion: 'Ahri', score: 0.85, reasons: ['Synergy'] }
+                ]
+            })
+        });
+
+        // Mock explain endpoint (failure)
+        mockFetch.mockResolvedValueOnce({
+            ok: false,
+            text: async () => 'Explanation service unavailable'
+        });
+
+        const { result } = renderHook(() => useRecommendations(defaultDraft, mockSetDraft, mockChampions));
+
+        await act(async () => {
+            await result.current.handlePredict();
+        });
+
+        // Recommendations should still be available
+        expect(result.current.loading).toBe(false);
+        expect(result.current.recommendations).toHaveLength(1);
+        expect(result.current.recommendations[0].championName).toBe('Ahri');
+
+        // Explanation should remain empty
+        await waitFor(() => {
+            expect(result.current.recommendations[0].explanation).toBe('');
+        });
+    });
+
+    it('handles explanation network error gracefully', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
+        // Mock recommend endpoint (success)
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                recommendations: [
+                    { champion: 'Ahri', score: 0.85, reasons: ['Synergy'] }
+                ]
+            })
+        });
+
+        // Mock explain endpoint (network error)
+        mockFetch.mockRejectedValueOnce(new Error('Network failure'));
+
+        const { result } = renderHook(() => useRecommendations(defaultDraft, mockSetDraft, mockChampions));
+
+        await act(async () => {
+            await result.current.handlePredict();
+        });
+
+        // Recommendations should still be available
+        expect(result.current.loading).toBe(false);
+        expect(result.current.recommendations).toHaveLength(1);
+
+        // Wait for error to be logged
+        await waitFor(() => {
+            expect(consoleSpy).toHaveBeenCalledWith('Explanation fetch error:', expect.any(Error));
+        });
+
+        consoleSpy.mockRestore();
     });
 });

@@ -74,10 +74,9 @@ class TestScoreCandidate:
 
         # Score should be higher than base due to positive synergy and counter
         assert score > 0.55
-        assert len(reasons) == 4
         assert "Base Winrate: 55.0%" in reasons
-        assert "Synergy Lift: +5.0%" in reasons
-        assert "Counter Lift: +2.0%" in reasons
+        assert "Synergy w/ Amumu: +5.0%" in reasons
+        assert "Good vs Zed: +2.0%" in reasons
 
     def test_unknown_champion(self):
         """Unknown champion should default to 50% winrate."""
@@ -111,7 +110,7 @@ class TestScoreCandidate:
 
         # Score should be lower than base due to bad matchup
         assert score < 0.50
-        assert "Counter Lift: -5.0%" in reasons
+        assert "Bad vs Zed: -5.0%" in reasons
 
     def test_multiple_allies_and_enemies(self):
         """Should handle multiple allies and enemies."""
@@ -142,8 +141,10 @@ class TestScoreCandidate:
         )
 
         # Should aggregate all synergies and counters
-        assert "Synergy Lift: +3.0%" in reasons  # 2% + 1%
-        assert "Counter Lift: -2.0%" in reasons  # -3% + 1%
+        assert "Synergy w/ Amumu: +2.0%" in reasons
+        assert "Synergy w/ Jinx: +1.0%" in reasons
+        assert "Bad vs Zed: -3.0%" in reasons
+        assert "Good vs LeeSin: +1.0%" in reasons
 
     def test_custom_weights(self):
         """Custom weights should affect scoring."""
@@ -206,15 +207,15 @@ class TestScoreCandidate:
 
         # Should extract lift values correctly
         assert score >= 0.52  # Positive synergy, negative counter (net positive)
-        assert "Synergy Lift: +6.0%" in reasons
-        assert "Counter Lift: -4.0%" in reasons
+        assert "Synergy w/ Amumu: +6.0%" in reasons
+        assert "Bad vs Zed: -4.0%" in reasons
 
     def test_small_lifts_not_shown(self):
         """Very small lifts should not appear in reasons."""
         config = ScoringConfig()
         stats = {
             "role_strength": {"MID": {"Ahri": 0.50}},
-            "synergy": {"Ahri": {"Amumu": 0.001}},  # Very small
+            "synergy": {"Ahri": {"Amumu": 0.005}},  # 0.5% (below 1% threshold)
             "counter": {},
         }
 
@@ -222,6 +223,6 @@ class TestScoreCandidate:
             candidate="Ahri", role="MID", allies=["Amumu"], enemies=[], stats=stats, config=config
         )
 
-        # Should not show synergy lift (< 0.5%)
+        # Should not show synergy lift (< 1%)
         synergy_reasons = [r for r in reasons if "Synergy" in r]
         assert len(synergy_reasons) == 0

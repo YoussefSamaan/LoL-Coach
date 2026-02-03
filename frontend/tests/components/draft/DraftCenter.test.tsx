@@ -36,6 +36,6 @@ describe('DraftCenter', () => {
 
         expect(screen.getByText('Lee Sin')).toBeInTheDocument();
         expect(screen.getByText('Elise')).toBeInTheDocument();
-        expect(screen.getByText('Showing Top 3 Recommendations')).toBeInTheDocument();
+        expect(screen.getByText('Showing Top 2 Recommendations')).toBeInTheDocument();
     });
 });
