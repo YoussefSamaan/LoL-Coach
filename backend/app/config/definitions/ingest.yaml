@@ -34,8 +34,10 @@ stages:
   aggregate: true
 
 # Source Configurations (Ladder Scans)
-# Total target: ~300 players * 40 matches = 12,000 matches
+# Target: 20,000 - 100,000 matches
+# Calculation: ~2,500 players * 40 matches = ~100,000 matches
 sources:
+  # High ELO (Apex Tiers) - 300 players
   - type: "ladder"
     tier: "CHALLENGER"
     division: "I"
@@ -50,3 +52,56 @@ sources:
     tier: "MASTER"
     division: "I"
     count: 100 # Top 100 Master players
+
+  # Diamond Tier - 800 players (200 per division)
+  - type: "ladder"
+    tier: "DIAMOND"
+    division: "I"
+    count: 200
+  
+  - type: "ladder"
+    tier: "DIAMOND"
+    division: "II"
+    count: 200
+  
+  - type: "ladder"
+    tier: "DIAMOND"
+    division: "III"
+    count: 200
+  
+  - type: "ladder"
+    tier: "DIAMOND"
+    division: "IV"
+    count: 200
+
+  # Emerald Tier - 800 players (200 per division)
+  - type: "ladder"
+    tier: "EMERALD"
+    division: "I"
+    count: 200
+  
+  - type: "ladder"
+    tier: "EMERALD"
+    division: "II"
+    count: 200
+  
+  - type: "ladder"
+    tier: "EMERALD"
+    division: "III"
+    count: 200
+  
+  - type: "ladder"
+    tier: "EMERALD"
+    division: "IV"
+    count: 200
+
+  # Platinum Tier - 600 players (300 per division, top 2 divisions only)
+  - type: "ladder"
+    tier: "PLATINUM"
+    division: "I"
+    count: 300
+  
+  - type: "ladder"
+    tier: "PLATINUM"
+    division: "II"
+    count: 300
