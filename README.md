@@ -68,8 +68,8 @@ cd LoL-Coach
 
 ### Backend (FastAPI / Python)
 *   **Pipeline Pattern**: Data ingestion is orchestrated as a series of distinct steps (Fetch -> Parse -> Aggregate).
-*   **Strategy Pattern**: Each pipeline step (`app/ingest/steps/`) encapsulates a specific algorithm, making the pipeline easily extensible.
-*   **Repository Pattern**: The `ModelRegistry` (`app/services`) abstracts artifact loading and versioning.
+*   **Strategy Pattern**: Each pipeline step (`ingest/src/ingest/`) encapsulates a specific algorithm, making the pipeline easily extensible.
+*   **Repository Pattern**: The `ModelRegistry` (`ml/src/ml/registry.py`) abstracts artifact loading and versioning.
 *   **Singleton**: Configuration settings are cached and globally accessible.
 
 ### Frontend (Next.js / React)
@@ -117,6 +117,7 @@ graph TD
     *   $Lift_{counter}$ is the probability delta ($P(Win \mid Enemy) - P_{base}$).
 
 6.  **Explain**: Returns the "Why" (e.g., "+4% winrate with Jinx").
+7.  **Serve & Refresh**: On startup, the backend preloads the current artifact if one exists, keeps it in memory for requests, and automatically switches to a newly built artifact when the registry updates.
 
 ---
 
@@ -162,6 +163,7 @@ graph TD
 ### Utility Endpoints
 *   `GET /health` — System status
 *   `GET /version` — Artifact/Model version info
+*   `GET /ml-status` — Artifact availability and in-memory load status
 
 ---
 
@@ -189,11 +191,13 @@ A `config.yml` file at the root manages development settings (ports, test covera
 *   **Backend**: 
     *   `RIOT_API_KEY`: Required for fetching new data.
     *   `GEMINI_API_KEY` / `OPENAI_API_KEY`: Required for generating LLM explanations (depending on `GENAI_PROVIDER`).
+    *   `GENAI_PROVIDER`: Selects the explanation provider (`gemini` or `openai`).
     *   `PORT`: Port configuration.
+    *   `ARTIFACT_REFRESH_INTERVAL_SECONDS`: How often the backend checks for a newly built artifact while running.
 
 ### Data & Patch
 *   **DataDragon**: Champion metadata + images are loaded from Riot DataDragon for a configured patch version (currently 14.24.1).
-*   **GenAI**: Hooks (`backend/app/genai`) are available for LLM integration (Google Gemini / OpenAI), though optional for the MVP.
+*   **GenAI**: Hooks (`backend/src/backend/genai`) are available for LLM integration (Google Gemini / OpenAI), though optional for the MVP.
 
 ---
 
@@ -219,21 +223,18 @@ A `config.yml` file at the root manages development settings (ports, test covera
 
 ```txt
 LoL Coach/
-├── backend/            # FastAPI, ML Models (Additive Lift), Ingestion
-│   ├── app/
-│   │   ├── api/            # FastAPI Routers (v1)
-│   │   ├── config/         # App Configuration
-│   │   ├── domain/         # Business Logic & Enums
-│   │   ├── genai/          # LLM Integration (Gemini / OpenAI)
-│   │   ├── ingest/         # Ingestion Pipeline (Strategy Pattern)
-│   │   ├── ml/             # Additive Lift Model & Artifacts
-│   │   ├── riot_accessor/  # Resilient Riot API Client
-│   │   ├── schemas/        # Pydantic Models
-│   │   ├── services/       # Service Layer (ModelRegistry)
-│   │   └── utils/          # Logging & Helpers
-│   ├── artifacts/          # ML Model Artifacts & Stats
-│   ├── data/               # Raw & Processed Data
-│   └── tests/              # 100% Coverage Suite
+├── backend/
+│   ├── src/backend/        # FastAPI app, routes, schemas, services, GenAI
+│   └── tests/              # Backend test suite
+├── core/
+│   ├── src/core/           # Shared config, enums, logging, utilities
+│   └── tests/              # Core test suite
+├── ingest/
+│   ├── src/ingest/         # Riot ingestion clients, parsing, transforms, pipeline
+│   └── tests/              # Ingest test suite
+├── ml/
+│   ├── src/ml/             # Artifact building, registry, models, scoring
+│   └── tests/              # ML test suite
 ├── frontend/
 │   ├── app/                # Next.js App Router
 │   ├── components/         #
@@ -243,6 +244,9 @@ LoL Coach/
 │   ├── constants/          # App Constants
 │   ├── types/              # TypeScript Definitions
 │   └── tests/              # 100% Coverage Suite
+├── artifacts/              # Built ML artifacts used by the backend
+├── data/                   # Raw, parsed, aggregate, and eval data
+├── tests/                  # Integration tests
 ├── run_backend.sh          # Backend Setup/Test/Run Script
 ├── run_frontend.sh         # Frontend Setup/Test/Run Script
 └── config.yml              # Central Dev Config

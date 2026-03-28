@@ -1,4 +1,4 @@
-from app.genai.prompts import DraftPrompts
+from backend.genai.prompts import DraftPrompts
 
 
 def test_simple_explanation():

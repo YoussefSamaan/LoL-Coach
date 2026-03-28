@@ -1,0 +1,20 @@
+{
+  "artifact_stats": {
+    "counter_pairs": 11062,
+    "num_champions": 172,
+    "synergy_pairs": 8176
+  },
+  "config": {
+    "min_samples": 100,
+    "smoothing": "role=Beta(5.0,5.0), pair=Beta(10.0,10.0)"
+  },
+  "data_quality": {
+    "malformed_count": 0,
+    "skipped_pct": 0.0
+  },
+  "rows_count": 592410,
+  "run_id": "2026-03-28_10-46-37_962992",
+  "source": "/Users/youssefsamaan/Desktop/Projects/LoL Coach/data/parsed",
+  "timestamp": 1774719997.964023,
+  "version": "v1.0.0"
+}

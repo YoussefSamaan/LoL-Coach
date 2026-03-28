@@ -19,8 +19,8 @@ jobs:
         include:
           # 1) Backend image
           - name: backend
-            context: ./backend
-            dockerfile: ./backend/Dockerfile
+            context: .
+            dockerfile: ./Dockerfile
             image: lol-coach-backend
 
           # 2) Frontend image

@@ -4,9 +4,9 @@ import json
 import pytest
 from pathlib import Path
 
-from app.services.model_registry import ModelRegistry, VersionInfo, RegistryState
-from app.ml.artifacts import ArtifactBundle
-from app.ml.training import ArtifactStats, ManifestData
+from ml.registry import ModelRegistry, VersionInfo, RegistryState
+from ml.artifacts.manifest import ArtifactBundle
+from ml.training import ArtifactStats, ManifestData
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def sample_artifact_bundle():
 
 def create_mock_run(artifacts_root: Path, run_id: str, bundle: ArtifactBundle):
     """Helper to create a mock run directory with artifacts."""
-    from app.ml.artifacts import save_artifact_bundle
+    from ml.artifacts.manifest import save_artifact_bundle
 
     run_dir = artifacts_root / "runs" / run_id
     save_artifact_bundle(run_dir, bundle)
@@ -59,7 +59,9 @@ class TestModelRegistryBasics:
         assert state.previous is None
         assert len(state.versions) == 0
 
-    def test_backward_compat_latest_json(self, mock_artifacts_root, sample_artifact_bundle):
+    def test_backward_compat_latest_json(
+        self, mock_artifacts_root, sample_artifact_bundle
+    ):
         """Should load from latest.json for backward compatibility."""
         # Create run
         create_mock_run(mock_artifacts_root, "run_123", sample_artifact_bundle)
@@ -106,7 +108,9 @@ class TestRegisterAndLoad:
         assert state.previous == "run_001"
         assert len(state.versions) == 2
 
-    def test_load_latest_after_register(self, mock_artifacts_root, sample_artifact_bundle):
+    def test_load_latest_after_register(
+        self, mock_artifacts_root, sample_artifact_bundle
+    ):
         """Should load the current registered model."""
         create_mock_run(mock_artifacts_root, "run_001", sample_artifact_bundle)
 
@@ -290,8 +294,12 @@ class TestPydanticModels:
             current="run_002",
             previous="run_001",
             versions={
-                "run_001": VersionInfo(run_id="run_001", version="v1.0.0", timestamp=1.0),
-                "run_002": VersionInfo(run_id="run_002", version="v1.1.0", timestamp=2.0),
+                "run_001": VersionInfo(
+                    run_id="run_001", version="v1.0.0", timestamp=1.0
+                ),
+                "run_002": VersionInfo(
+                    run_id="run_002", version="v1.1.0", timestamp=2.0
+                ),
             },
         )
 

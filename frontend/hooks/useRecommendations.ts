@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Recommendation, Role, Champion } from '@/types';
 import { DraftState } from './useDraft';
 
@@ -6,9 +6,10 @@ export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<R
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const latestRequestId = useRef(0);
 
     // Helper to fetch explanations
-    const fetchExplanations = useCallback(async (backendUrl: string, role: Role, recs: Recommendation[]) => {
+    const fetchExplanations = useCallback(async (backendUrl: string, role: Role, recs: Recommendation[], requestId: number) => {
         try {
             // Get current allies and enemies from draft state
             const cleanAllies = draft.allies.filter((c): c is string => !!c);
@@ -32,6 +33,9 @@ export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<R
 
             if (response.ok) {
                 const data = await response.json();
+                if (latestRequestId.current !== requestId) {
+                    return;
+                }
 
                 interface ExplanationItem {
                     champion: string;
@@ -53,6 +57,9 @@ export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<R
     }, [draft.allies, draft.enemies]);
 
     const handlePredict = useCallback(async () => {
+        const requestId = latestRequestId.current + 1;
+        latestRequestId.current = requestId;
+
         // 2. Check if target role is already filled
         const roleIndex = [Role.TOP, Role.JUNGLE, Role.MID, Role.ADC, Role.SUPPORT].indexOf(draft.targetRole);
         const isRoleFilled = draft.allies[roleIndex] !== null;
@@ -99,6 +106,9 @@ export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<R
             }
 
             const data = await response.json();
+            if (latestRequestId.current !== requestId) {
+                return;
+            }
 
             interface BackendRecommendation {
                 champion: string;
@@ -124,12 +134,14 @@ export const useRecommendations = (draft: DraftState, setDraft: React.Dispatch<R
 
             // Step 2: Get Explanations (Async/Slow)
             // We do this without await so UI unblocks immediately
-            fetchExplanations(backendUrl, draft.targetRole, mappedRecs);
+            void fetchExplanations(backendUrl, draft.targetRole, mappedRecs, requestId);
 
         } catch (err) {
             console.error("Prediction Error:", err);
-            setError('Failed to get recommendations');
-            setLoading(false);
+            if (latestRequestId.current === requestId) {
+                setError('Failed to get recommendations');
+                setLoading(false);
+            }
         }
     }, [draft, championList, setDraft, fetchExplanations]);
 

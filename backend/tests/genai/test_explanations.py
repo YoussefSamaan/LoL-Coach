@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.genai.explanations import (
+from backend.genai.explanations import (
     agenerate_ai_explanation,
     build_explanation,
     generate_ai_explanation,
@@ -21,8 +21,8 @@ def test_build_explanation_with_reasons():
     assert expl == "Ahri: Good mobility; High damage"
 
 
-@patch("app.config.settings.settings")
-@patch("app.genai.explanations.get_client")
+@patch("core.config.settings.settings")
+@patch("backend.genai.explanations.get_client")
 def test_generate_ai_explanation_success(mock_get_client, mock_settings):
     """Test successful AI explanation generation."""
     mock_settings.genai.api_key = "test-key"
@@ -46,8 +46,8 @@ def test_generate_ai_explanation_success(mock_get_client, mock_settings):
     assert "Reason 1" in prompt_used
 
 
-@patch("app.config.settings.settings")
-@patch("app.genai.explanations.get_client")
+@patch("core.config.settings.settings")
+@patch("backend.genai.explanations.get_client")
 def test_generate_ai_explanation_failure(mock_get_client, mock_settings):
     """Test fallback to heuristic when AI generation fails."""
     mock_settings.genai.api_key = "test-key"
@@ -63,14 +63,16 @@ def test_generate_ai_explanation_failure(mock_get_client, mock_settings):
     assert result == "Ahri: Reason 1"
 
 
-@patch("app.config.settings.settings")
-@patch("app.genai.explanations.get_client")
+@patch("core.config.settings.settings")
+@patch("backend.genai.explanations.get_client")
 def test_generate_ai_explanation_no_api_key(mock_get_client, mock_settings):
     """Test fallback when API key is missing."""
     # Simulate missing API key
     mock_settings.genai.api_key = ""
 
-    result = generate_ai_explanation(champion="Ahri", allies=[], enemies=[], reasons=["Reason 1"])
+    result = generate_ai_explanation(
+        champion="Ahri", allies=[], enemies=[], reasons=["Reason 1"]
+    )
 
     # Should match fallback explanation format
     assert result == "Ahri: Reason 1"
@@ -80,8 +82,8 @@ def test_generate_ai_explanation_no_api_key(mock_get_client, mock_settings):
 
 
 @pytest.mark.asyncio
-@patch("app.config.settings.settings")
-@patch("app.genai.explanations.get_client")
+@patch("core.config.settings.settings")
+@patch("backend.genai.explanations.get_client")
 async def test_agenerate_ai_explanation_success(mock_get_client, mock_settings):
     """Test successful async AI explanation generation."""
     mock_settings.genai.api_key = "test-key"
@@ -100,8 +102,8 @@ async def test_agenerate_ai_explanation_success(mock_get_client, mock_settings):
 
 
 @pytest.mark.asyncio
-@patch("app.config.settings.settings")
-@patch("app.genai.explanations.get_client")
+@patch("core.config.settings.settings")
+@patch("backend.genai.explanations.get_client")
 async def test_agenerate_ai_explanation_failure(mock_get_client, mock_settings):
     """Test fallback when async AI generation fails."""
     mock_settings.genai.api_key = "test-key"
@@ -117,8 +119,8 @@ async def test_agenerate_ai_explanation_failure(mock_get_client, mock_settings):
 
 
 @pytest.mark.asyncio
-@patch("app.config.settings.settings")
-@patch("app.genai.explanations.get_client")
+@patch("core.config.settings.settings")
+@patch("backend.genai.explanations.get_client")
 async def test_agenerate_ai_explanation_no_api_key(mock_get_client, mock_settings):
     """Test fallback when API key is missing for async."""
     mock_settings.genai.api_key = ""

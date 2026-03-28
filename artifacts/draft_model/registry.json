@@ -1,0 +1,17 @@
+{
+  "current": "2026-03-28_10-46-37_962992",
+  "previous": null,
+  "versions": {
+    "2026-03-28_10-46-37_962992": {
+      "run_id": "2026-03-28_10-46-37_962992",
+      "version": "v1.0.1",
+      "timestamp": 1774719998.062948,
+      "metrics": {
+        "rows": 592410,
+        "champions": 172,
+        "synergy_pairs": 8176,
+        "counter_pairs": 11062
+      }
+    }
+  }
+}

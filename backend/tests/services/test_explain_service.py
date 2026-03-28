@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import patch, AsyncMock
 
-from app.domain.enums import Role
-from app.schemas.explain import ChampionRecommendation, ExplainDraftRequest
-from app.services.explain_service import ExplainService
+from core.domain.enums import Role
+from backend.schemas.explain import ChampionRecommendation, ExplainDraftRequest
+from backend.services.explain_service import ExplainService
 
 
 @pytest.mark.asyncio
@@ -23,11 +23,12 @@ async def test_explain_draft_with_ai():
         ],
     )
 
-    with patch("app.services.explain_service.settings") as mock_settings:
+    with patch("backend.services.explain_service.settings") as mock_settings:
         mock_settings.genai.api_key = "test-key"
 
         with patch(
-            "app.services.explain_service.agenerate_ai_explanation", new_callable=AsyncMock
+            "backend.services.explain_service.agenerate_ai_explanation",
+            new_callable=AsyncMock,
         ) as mock_ai:
             mock_ai.return_value = "AI explanation for Aatrox"
 
@@ -49,12 +50,15 @@ async def test_explain_draft_without_ai():
         role=Role.MID,
         recommendations=[
             ChampionRecommendation(
-                champion="Ahri", allies=[], enemies=[], reasons=["High mobility", "Strong poke"]
+                champion="Ahri",
+                allies=[],
+                enemies=[],
+                reasons=["High mobility", "Strong poke"],
             )
         ],
     )
 
-    with patch("app.services.explain_service.settings") as mock_settings:
+    with patch("backend.services.explain_service.settings") as mock_settings:
         mock_settings.genai.api_key = None
 
         resp = await service.explain_draft(payload)
@@ -68,12 +72,12 @@ async def test_explain_draft_without_ai():
 
 def test_get_explain_service_singleton():
     """Test that get_explain_service returns the same instance."""
-    from app.services.explain_service import get_explain_service
+    from backend.services.explain_service import get_explain_service
 
     # Reset singleton
-    import app.services.explain_service
+    import backend.services.explain_service
 
-    app.services.explain_service._service_instance = None
+    backend.services.explain_service._service_instance = None
 
     service1 = get_explain_service()
     service2 = get_explain_service()

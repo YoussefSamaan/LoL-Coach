@@ -12,8 +12,7 @@ MODE=$1
 setup_and_test() {
     echo -e "${GREEN}Starting Backend Setup...${NC}"
     
-    cd backend
-
+    # We now operate from the root directory to manage all packages
     # 1. Ensure venv exists
     if [ ! -d "venv" ]; then
         echo "Creating virtual environment..."
@@ -24,12 +23,16 @@ setup_and_test() {
     source venv/bin/activate
 
     # 3. Install/Update dependencies
-    echo "Installing dependencies..."
+    echo "Installing dependencies across all local packages..."
     pip install -q --upgrade pip
-    pip install -q -e '.[dev]'
+    pip install -q -e ./core
+    pip install -q -e ./ingest
+    pip install -q -e ./ml
+    pip install -q -e "./backend[dev]"
+    export PYTHONPATH="core/src:ingest/src:ml/src:backend/src${PYTHONPATH:+:$PYTHONPATH}"
 
-    # 4. Read configuration from root config.yml (now that PyYAML is definitely in venv)
-    local CONFIG_PATH="../config.yml"
+    # 4. Read configuration from config.yml
+    local CONFIG_PATH="config.yml"
     if [ -f "$CONFIG_PATH" ]; then
         COVERAGE_THRESHOLD=$(python3 -c "import yaml; print(yaml.safe_load(open('$CONFIG_PATH'))['backend'].get('coverage_threshold', 90))" 2>/dev/null || echo "90")
         RUN_LINT=$(python3 -c "import yaml; print(yaml.safe_load(open('$CONFIG_PATH'))['backend'].get('checks', {}).get('lint', True))" 2>/dev/null || echo "True")
@@ -47,7 +50,7 @@ setup_and_test() {
     # 5. Linting (Ruff)
     if [ "$RUN_LINT" == "True" ]; then
         echo "Running Lint Check (ruff)..."
-        if ! ruff check .; then
+        if ! ruff check core ingest ml backend tests; then
             echo -e "${RED}Linting failed. Run './run_backend.sh fix' to attempt automatic fixes.${NC}"
             exit 1
         fi
@@ -58,7 +61,7 @@ setup_and_test() {
     # 6. Formatting Check (Ruff)
     if [ "$RUN_FORMAT" == "True" ]; then
         echo "Running Format Check (ruff)..."
-        if ! ruff format --check .; then
+        if ! ruff format --check core ingest ml backend tests; then
             echo -e "${RED}Formatting failed. Run './run_backend.sh fix' to reformat code.${NC}"
             exit 1
         fi
@@ -69,7 +72,7 @@ setup_and_test() {
     # 7. Type Checking (Mypy)
     if [ "$RUN_TYPE" == "True" ]; then
         echo "Running Type Check (mypy)..."
-        if ! mypy . --ignore-missing-imports; then
+        if ! mypy core ingest ml backend tests --ignore-missing-imports; then
             echo -e "${RED}Type checking failed.${NC}"
             exit 1
         fi
@@ -80,8 +83,7 @@ setup_and_test() {
     # 8. Run tests with coverage
     if [ "$RUN_TEST" == "True" ]; then
         echo "Running tests (Threshold: ${COVERAGE_THRESHOLD}%)..."
-        export PYTHONPATH=$PYTHONPATH:.
-        if pytest --cov=app --cov-fail-under=$COVERAGE_THRESHOLD tests/; then
+        if pytest --cov=core --cov=ingest --cov=ml --cov=backend --cov-fail-under=$COVERAGE_THRESHOLD tests/ core/tests/ ingest/tests/ ml/tests/ backend/tests/ tests/integration/; then
             echo -e "${GREEN}Backend tests passed with >${COVERAGE_THRESHOLD}% coverage!${NC}"
         else
             echo -e "${RED}Backend tests failed or coverage <${COVERAGE_THRESHOLD}%. Aborting.${NC}"
@@ -90,53 +92,47 @@ setup_and_test() {
     else
         echo "Skipping Tests..."
     fi
-    cd ..
 }
 
 fix_code() {
     echo -e "${BLUE}Running Auto-Fixers (Ruff)...${NC}"
-    cd backend
     if [ ! -d "venv" ]; then
         echo "Creating virtual environment..."
         python3 -m venv venv
     fi
     source venv/bin/activate
-    pip install -q -e '.[dev]'
+    pip install -q -e "./backend[dev]"
+    export PYTHONPATH="core/src:ingest/src:ml/src:backend/src${PYTHONPATH:+:$PYTHONPATH}"
 
     echo "Fixing linting issues..."
-    ruff check --fix . || true
+    ruff check --fix core ingest ml backend tests || true
     echo "Formatting code..."
-    ruff format .
+    ruff format core ingest ml backend tests
     echo -e "${GREEN}Code fixed and reformatted!${NC}"
-    cd ..
 }
 
 
 run_server() {
     echo -e "${BLUE}Starting Backend Server...${NC}"
     
-    cd backend 2>/dev/null || true
     if [ ! -d "venv" ]; then
         echo "Environment not found. Running setup..."
-        cd ..
         setup_and_test
-        cd backend
     fi
     source venv/bin/activate
+    export PYTHONPATH="core/src:ingest/src:ml/src:backend/src${PYTHONPATH:+:$PYTHONPATH}"
 
     # Read port from config.yml
-    if [ -f "../config.yml" ]; then
-        PORT=$(python3 -c "import yaml; print(yaml.safe_load(open('../config.yml'))['backend'].get('port', 8000))" 2>/dev/null || echo "8000")
+    if [ -f "config.yml" ]; then
+        PORT=$(python3 -c "import yaml; print(yaml.safe_load(open('config.yml'))['backend'].get('port', 8000))" 2>/dev/null || echo "8000")
     else
         PORT="8000"
     fi
 
     # Run server
     echo -e "${GREEN}API documentation available at http://localhost:${PORT}/docs${NC}"
-    PORT=$PORT python3 -m app.main
+    PORT=$PORT uvicorn backend.main:app --host 0.0.0.0 --port $PORT --reload
 }
-
-
 
 if [ "$MODE" == "test" ]; then
     setup_and_test

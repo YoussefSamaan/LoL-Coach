@@ -1,0 +1,30 @@
+# ML Pipeline Configuration
+# Controls what happens during backend startup
+
+# Pipeline stages - set to false to skip a stage
+stages:
+  build_artifacts: true      # Build ML artifacts from parsed data
+  load_model: true           # Load model into memory
+  evaluate: true             # Run evaluation on test set
+  generate_report: true      # Generate status report
+
+# Build configuration
+build:
+  force_rebuild: true        # Always rebuild artifacts (true) or use existing (false)
+  min_samples: 100           # Minimum samples required to build artifacts
+
+# Evaluation configuration  
+evaluation:
+  enabled: true              # Run evaluation on startup
+  max_samples: 5000          # Max samples for quick evaluation (null = all)
+  train_test_split: 0.8      # Train/test split ratio
+  metrics:
+    - recall@10
+    - ndcg@10
+    - score_correlation
+
+# Reporting
+reporting:
+  save_to_file: true         # Save report to data/ml_pipeline_status.json
+  log_to_console: true       # Print report to console
+  include_warnings: true     # Include warnings in report

@@ -1,53 +1,36 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lol-coach-backend"
+name = "backend"
 version = "0.1.0"
-description = "FastAPI backend for LoL Coach draft recommendations"
-readme = "README.md"
-requires-python = ">=3.11"
+description = "API Backend server for LoL Coach"
 dependencies = [
-  "fastapi>=0.109.0,<1.0.0",
-  "uvicorn[standard]>=0.27.0,<1.0.0",
-  "httpx>=0.26.0,<1.0.0",
-  "pydantic",
-  "python-dotenv",
-  "pyyaml",
-  "requests",
-  "pandas",
-  "pyarrow",
-  "google-genai",
-  "openai",
+    "core",
+    "ml",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
 ]
 
 [project.optional-dependencies]
+genai = [
+    "google-genai",
+    "openai",
+]
 dev = [
-  "pytest>=8.0.0,<9.0.0",
-  "pytest-cov>=4.1.0,<6.0.0",
-  "pytest-asyncio>=0.23.0,<1.0.0",
-  "ruff>=0.1.14,<1.0.0",
-  "mypy>=1.8.0,<2.0.0",
-  "types-PyYAML>=6.0.0.20240311",
-  "types-requests>=2.31.0.20240106",
-  "pandas-stubs",
+    "google-genai",
+    "openai",
+    "httpx",
+    "mypy",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "ruff",
+    "types-PyYAML",
+    "types-requests",
 ]
 
-[tool.setuptools]
-include-package-data = true
-
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["app*"]
-
-[tool.setuptools.package-data]
-app = ["config/*.yaml"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["."]
-
-[tool.ruff]
-line-length = 100
-target-version = "py311"
+where = ["src"]

@@ -1,0 +1,36 @@
+# Task Status
+
+## M0 - Scaffold (Done)
+- [x] Backend FastAPI Structure setup (`backend/app/main.py`)
+- [x] Backend Configuration Management (`backend/app/config`)
+    - [x] Centralized `settings.py` (Deleted `env.py`, `loader.py`)
+    - [x] Moved YAMLs to `definitions/`
+- [x] Basic Test Scaffolding (`backend/tests`)
+- [x] Riot API Client Structure (`backend/app/riot_accessor`)
+    - [x] Added `routing.py` for Region/Platform hosts
+    - [x] Simplified `client.py` env loading
+    - [x] Cleaned `.env.example`
+
+## M1 - Resume-worthy MVP (In Progress)
+### Done (Found in Codebase)
+- [x] **Data Ingestion Pipeline**:
+    - [x] Match V5 fetching (`backend/app/ingest/pull_matches.py`) - *Refactored to MatchIngestor*
+    - [x] Champion DataDragon fetching (`backend/app/ingest/fetch_ddragon.py`)
+    - [x] Data Extraction/Processing (`backend/app/ingest/extract_data.py`) - *Refactored to MatchExtract*
+    - [x] **Pipeline Refactor**: Implemented `IngestPipeline` pattern with configurable steps (`main.py`, `pipeline.py`, `steps.py`).
+- [x] **Recommendation Logic (Basic)**:
+    - [x] Recommendation Service Structure (`backend/app/services/recommend_service.py`)
+    - [x] Scoring Config Loading (`backend/app/ml/scoring.py`)
+    - [x] API Endpoint for Draft Recommendation (`backend/app/api/v1/recommend.py`)
+- [x] **GenAI Structure**:
+    - [x] `app/genai/` directory created with `explanations.py` stub.
+
+### To Do (For M1 Compliance)
+- [ ] **Implement GenAI Explanations**: 
+    - Current `explanations.py` is a stub string replacer. Needs actual LLM integration as per new specs.
+- [ ] **Offline Evaluation**:
+    - Build metrics calculation (NDCG@K, Recall) for the recommendation model.
+- [ ] **Full Test Coverage**:
+    - Ensure all new modules (Ingest, ML, GenAI) have 100% test coverage.
+- [ ] **Frontend Integration**:
+    - (Frontend state unknown from this backend audit, but integration is key for M1).

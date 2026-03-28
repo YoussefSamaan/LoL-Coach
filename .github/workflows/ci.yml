@@ -11,11 +11,8 @@ concurrency:
 
 jobs:
   backend:
-    name: Backend (FastAPI)
+    name: Backend (Python Packages)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - uses: actions/checkout@v4
 
@@ -23,8 +20,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: backend/pyproject.toml
+          # Skipping cache since we have multiple pyproject.toml files
 
       - name: Install PyYAML
         run: pip install PyYAML
@@ -32,11 +28,10 @@ jobs:
       - name: Load Config
         id: config
         run: |
-          # Read config from root (one level up from working-directory: backend)
           python3 -c "
           import yaml
           import os
-          config_path = '../config.yml'
+          config_path = 'config.yml'
           if not os.path.exists(config_path):
               print('lint=true\nformat=true\ntype_check=true\ntest=true\ncoverage_threshold=90')
               exit(0)
@@ -44,37 +39,40 @@ jobs:
               data = yaml.safe_load(f).get('backend', {})
               checks = data.get('checks', {})
               threshold = data.get('coverage_threshold', 90)
-          print(f'lint={str(checks.get('lint', True)).lower()}')
-          print(f'format={str(checks.get('format', True)).lower()}')
-          print(f'type_check={str(checks.get('type_check', True)).lower()}')
-          print(f'test={str(checks.get('test', True)).lower()}')
+          print(f'lint={str(checks.get(\"lint\", True)).lower()}')
+          print(f'format={str(checks.get(\"format\", True)).lower()}')
+          print(f'type_check={str(checks.get(\"type_check\", True)).lower()}')
+          print(f'test={str(checks.get(\"test\", True)).lower()}')
           print(f'coverage_threshold={threshold}')
           " >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev]
+          pip install -e ./core
+          pip install -e ./ingest
+          pip install -e ./ml
+          pip install -e "./backend[dev]"
 
       - name: Lint (ruff)
         if: steps.config.outputs.lint == 'true'
-        run: ruff check .
+        run: ruff check core ingest ml backend tests
 
       - name: Format check (ruff format)
         if: steps.config.outputs.format == 'true'
-        run: ruff format --check .
+        run: ruff format --check core ingest ml backend tests
 
       - name: Type check (mypy)
         if: steps.config.outputs.type_check == 'true'
         env:
-          PYTHONPATH: .
-        run: mypy .
+          PYTHONPATH: core/src:ingest/src:ml/src:backend/src
+        run: mypy core ingest ml backend tests --ignore-missing-imports
 
       - name: Run tests (pytest)
         if: steps.config.outputs.test == 'true'
         env:
-          PYTHONPATH: .
-        run: pytest --cov=app --cov-fail-under=${{ steps.config.outputs.coverage_threshold }} -q
+          PYTHONPATH: core/src:ingest/src:ml/src:backend/src
+        run: pytest --cov=core --cov=ingest --cov=ml --cov=backend --cov-fail-under=${{ steps.config.outputs.coverage_threshold }} -q tests/ core/tests/ ingest/tests/ ml/tests/ backend/tests/ tests/integration/
 
   frontend:
     name: Frontend (React)

@@ -1,11 +1,13 @@
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from app.genai.client import GeminiClient, OpenAIClient, get_client
+import backend.genai.client as client_module
+from backend.genai.client import GeminiClient, OpenAIClient, get_client
 
 
-@patch("app.genai.client.genai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.genai")
+@patch("backend.genai.client.settings")
 def test_gemini_client_initialization(mock_settings, mock_genai):
     """Test GeminiClient initialization."""
     mock_settings.genai.gemini_api_key = "test_key"
@@ -17,7 +19,7 @@ def test_gemini_client_initialization(mock_settings, mock_genai):
     assert client.model == "test_model"
 
 
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.settings")
 def test_gemini_client_missing_key(mock_settings):
     """Test initialization raises error without API key."""
     mock_settings.genai.gemini_api_key = ""
@@ -26,8 +28,8 @@ def test_gemini_client_missing_key(mock_settings):
         GeminiClient()
 
 
-@patch("app.genai.client.genai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.genai")
+@patch("backend.genai.client.settings")
 def test_gemini_client_generate(mock_settings, mock_genai):
     """Test generating content using GeminiClient."""
     mock_settings.genai.gemini_api_key = "test_key"
@@ -48,8 +50,8 @@ def test_gemini_client_generate(mock_settings, mock_genai):
     )
 
 
-@patch("app.genai.client.genai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.genai")
+@patch("backend.genai.client.settings")
 def test_gemini_client_generate_error(mock_settings, mock_genai):
     """Test handling of generation errors."""
     mock_settings.genai.gemini_api_key = "test_key"
@@ -66,8 +68,8 @@ def test_gemini_client_generate_error(mock_settings, mock_genai):
 
 
 @pytest.mark.asyncio
-@patch("app.genai.client.genai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.genai")
+@patch("backend.genai.client.settings")
 async def test_gemini_client_agenerate(mock_settings, mock_genai):
     """Test generating content using GeminiClient async."""
     mock_settings.genai.gemini_api_key = "test_key"
@@ -78,7 +80,9 @@ async def test_gemini_client_agenerate(mock_settings, mock_genai):
     mock_response.text = "Generated explanation"
 
     # Mock the async call
-    mock_client_instance.aio.models.generate_content = AsyncMock(return_value=mock_response)
+    mock_client_instance.aio.models.generate_content = AsyncMock(
+        return_value=mock_response
+    )
     mock_genai.Client.return_value = mock_client_instance
 
     client = GeminiClient()
@@ -91,8 +95,8 @@ async def test_gemini_client_agenerate(mock_settings, mock_genai):
 
 
 @pytest.mark.asyncio
-@patch("app.genai.client.genai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.genai")
+@patch("backend.genai.client.settings")
 async def test_gemini_client_agenerate_error(mock_settings, mock_genai):
     """Test handling of async generation errors."""
     mock_settings.genai.gemini_api_key = "test_key"
@@ -113,8 +117,8 @@ async def test_gemini_client_agenerate_error(mock_settings, mock_genai):
 # --- OpenAI Tests ---
 
 
-@patch("app.genai.client.openai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.openai")
+@patch("backend.genai.client.settings")
 def test_openai_client_initialization(mock_settings, mock_openai):
     """Test OpenAIClient initialization."""
     mock_settings.genai.openai_api_key = "test_key_oa"
@@ -126,7 +130,7 @@ def test_openai_client_initialization(mock_settings, mock_openai):
     assert client.model == "gpt-4o-mini"
 
 
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.settings")
 def test_openai_client_missing_key(mock_settings):
     """Test initialization raises error without OpenAI API key."""
     mock_settings.genai.openai_api_key = ""
@@ -135,8 +139,8 @@ def test_openai_client_missing_key(mock_settings):
         OpenAIClient()
 
 
-@patch("app.genai.client.openai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.openai")
+@patch("backend.genai.client.settings")
 def test_openai_client_generate(mock_settings, mock_openai):
     """Test generating content using OpenAIClient."""
     mock_settings.genai.openai_api_key = "test_key_oa"
@@ -161,15 +165,17 @@ def test_openai_client_generate(mock_settings, mock_openai):
     )
 
 
-@patch("app.genai.client.openai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.openai")
+@patch("backend.genai.client.settings")
 def test_openai_client_generate_error(mock_settings, mock_openai):
     """Test handling of generation errors for OpenAI."""
     mock_settings.genai.openai_api_key = "test_key_oa"
     mock_settings.genai.openai_model = "gpt-4o-mini"
 
     mock_client_instance = MagicMock()
-    mock_client_instance.chat.completions.create.side_effect = Exception("OpenAI API Error")
+    mock_client_instance.chat.completions.create.side_effect = Exception(
+        "OpenAI API Error"
+    )
     mock_openai.OpenAI.return_value = mock_client_instance
 
     client = OpenAIClient()
@@ -179,8 +185,8 @@ def test_openai_client_generate_error(mock_settings, mock_openai):
 
 
 @pytest.mark.asyncio
-@patch("app.genai.client.openai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.openai")
+@patch("backend.genai.client.settings")
 async def test_openai_client_agenerate(mock_settings, mock_openai):
     """Test generating content using OpenAIClient async."""
     mock_settings.genai.openai_api_key = "test_key_oa"
@@ -194,7 +200,9 @@ async def test_openai_client_agenerate(mock_settings, mock_openai):
     mock_choice.message.content = "OpenAI async explanation"
     mock_response.choices = [mock_choice]
 
-    mock_async_client_instance.chat.completions.create = AsyncMock(return_value=mock_response)
+    mock_async_client_instance.chat.completions.create = AsyncMock(
+        return_value=mock_response
+    )
 
     # Setup mock_openai to return appropriate clients
     mock_openai.OpenAI.return_value = mock_client_instance
@@ -211,8 +219,8 @@ async def test_openai_client_agenerate(mock_settings, mock_openai):
 
 
 @pytest.mark.asyncio
-@patch("app.genai.client.openai")
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.openai")
+@patch("backend.genai.client.settings")
 async def test_openai_client_agenerate_error(mock_settings, mock_openai):
     """Test handling of async generation errors for OpenAI."""
     mock_settings.genai.openai_api_key = "test_key_oa"
@@ -233,8 +241,8 @@ async def test_openai_client_agenerate_error(mock_settings, mock_openai):
 # --- Factory Tests ---
 
 
-@patch("app.genai.client.settings")
-@patch("app.genai.client.GeminiClient")
+@patch("backend.genai.client.settings")
+@patch("backend.genai.client.GeminiClient")
 def test_get_client_defaults(mock_gemini_cls, mock_settings):
     """Test get_client factory returns configured provider (default gemini)."""
     mock_settings.genai.provider = "gemini"
@@ -243,8 +251,8 @@ def test_get_client_defaults(mock_gemini_cls, mock_settings):
     assert client is mock_gemini_cls.return_value
 
 
-@patch("app.genai.client.settings")
-@patch("app.genai.client.GeminiClient")
+@patch("backend.genai.client.settings")
+@patch("backend.genai.client.GeminiClient")
 def test_get_client_specific_provider_gemini(mock_gemini_cls, mock_settings):
     """Test get_client factory with specific provider gemini."""
     client = get_client("gemini")
@@ -252,8 +260,8 @@ def test_get_client_specific_provider_gemini(mock_gemini_cls, mock_settings):
     assert client is mock_gemini_cls.return_value
 
 
-@patch("app.genai.client.settings")
-@patch("app.genai.client.OpenAIClient")
+@patch("backend.genai.client.settings")
+@patch("backend.genai.client.OpenAIClient")
 def test_get_client_specific_provider_openai(mock_openai_cls, mock_settings):
     """Test get_client factory with specific provider openai."""
     client = get_client("openai")
@@ -261,8 +269,8 @@ def test_get_client_specific_provider_openai(mock_openai_cls, mock_settings):
     assert client is mock_openai_cls.return_value
 
 
-@patch("app.genai.client.settings")
-@patch("app.genai.client.OpenAIClient")
+@patch("backend.genai.client.settings")
+@patch("backend.genai.client.OpenAIClient")
 def test_get_client_via_settings_openai(mock_openai_cls, mock_settings):
     """Test get_client factory using settings provider."""
     mock_settings.genai.provider = "openai"
@@ -271,7 +279,7 @@ def test_get_client_via_settings_openai(mock_openai_cls, mock_settings):
     assert client is mock_openai_cls.return_value
 
 
-@patch("app.genai.client.settings")
+@patch("backend.genai.client.settings")
 def test_get_client_unknown_provider(mock_settings):
     """Test get_client with unknown provider raises error."""
     mock_settings.genai.provider = "unknown_default"
@@ -283,3 +291,48 @@ def test_get_client_unknown_provider(mock_settings):
     # Test settings value
     with pytest.raises(ValueError, match="Unknown provider: unknown_default"):
         get_client()
+
+
+def test_get_genai_import_error(monkeypatch):
+    monkeypatch.setattr(client_module, "genai", None)
+    with patch("builtins.__import__", side_effect=ImportError("missing google.genai")):
+        with pytest.raises(RuntimeError, match="google-genai is not installed"):
+            client_module._get_genai()
+
+
+def test_get_openai_import_error(monkeypatch):
+    monkeypatch.setattr(client_module, "openai", None)
+    with patch("builtins.__import__", side_effect=ImportError("missing openai")):
+        with pytest.raises(RuntimeError, match="openai is not installed"):
+            client_module._get_openai()
+
+
+def test_get_genai_import_success(monkeypatch):
+    fake_genai = SimpleNamespace(Client=MagicMock())
+    monkeypatch.setattr(client_module, "genai", None)
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        assert name == "google"
+        assert "genai" in fromlist
+        return SimpleNamespace(genai=fake_genai)
+
+    with patch("builtins.__import__", side_effect=fake_import):
+        loaded = client_module._get_genai()
+
+    assert loaded is fake_genai
+    assert client_module.genai is fake_genai
+
+
+def test_get_openai_import_success(monkeypatch):
+    fake_openai = SimpleNamespace(OpenAI=MagicMock(), AsyncOpenAI=MagicMock())
+    monkeypatch.setattr(client_module, "openai", None)
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        assert name == "openai"
+        return fake_openai
+
+    with patch("builtins.__import__", side_effect=fake_import):
+        loaded = client_module._get_openai()
+
+    assert loaded is fake_openai
+    assert client_module.openai is fake_openai

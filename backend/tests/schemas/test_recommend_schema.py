@@ -1,5 +1,5 @@
-from app.schemas.recommend import RecommendDraftRequest
-from app.domain.enums import Role, Region
+from backend.schemas.recommend import RecommendDraftRequest
+from core.domain.enums import Role, Region
 
 
 def test_region_normalization():
@@ -20,7 +20,7 @@ def test_region_normalization():
 
 
 def test_response_model():
-    from app.schemas.recommend import RecommendDraftResponse, Recommendation
+    from backend.schemas.recommend import RecommendDraftResponse, Recommendation
 
     resp = RecommendDraftResponse(
         role=Role.TOP,

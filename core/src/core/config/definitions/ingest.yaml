@@ -1,0 +1,107 @@
+paths:
+  root_dir: "data"
+  raw_dir: "raw"
+  processed_dir: "processed"
+  parsed_dir: "parsed"
+  aggregates_dir: "aggregates"
+  manifest_dir: "manifests"
+  processed_filename: "matches"
+  processed_file_type: "json"
+  champion_map_dir: "data"
+  champion_map_filename: "champion_ids"
+  champion_map_file_type: "json"
+
+# Crawler Settings
+defaults:
+  region: "NA"
+  queue: "RANKED_SOLO_5x5"
+  # Fetch 40 matches per player to get recent history without going too far back
+  matches_per_player: 40
+  # Optional: Filter matches older than this timestamp (Unix Epoch or ISO)
+  # 0 means get everything
+  min_match_time: 0
+  # Whether to fetch new champion mapping from DataDragon (default: true)
+  fetch_champion_map: true
+  # Whether to delete raw JSON files after processing (default: false)
+  cleanup_raw: false
+
+# Execution Control
+stages:
+  fetch: false
+  scan: false
+  download: false
+  parse: true
+  aggregate: true
+
+# Source Configurations (Ladder Scans)
+# Target: 20,000 - 100,000 matches
+# Calculation: ~2,500 players * 40 matches = ~100,000 matches
+sources:
+  # High ELO (Apex Tiers) - 300 players
+  - type: "ladder"
+    tier: "CHALLENGER"
+    division: "I"
+    count: 100 # Top 100 Challenger players
+  
+  - type: "ladder"
+    tier: "GRANDMASTER"
+    division: "I"
+    count: 100 # Top 100 GM players
+
+  - type: "ladder"
+    tier: "MASTER"
+    division: "I"
+    count: 100 # Top 100 Master players
+
+  # Diamond Tier - 800 players (200 per division)
+  - type: "ladder"
+    tier: "DIAMOND"
+    division: "I"
+    count: 200
+  
+  - type: "ladder"
+    tier: "DIAMOND"
+    division: "II"
+    count: 200
+  
+  - type: "ladder"
+    tier: "DIAMOND"
+    division: "III"
+    count: 200
+  
+  - type: "ladder"
+    tier: "DIAMOND"
+    division: "IV"
+    count: 200
+
+  # Emerald Tier - 800 players (200 per division)
+  - type: "ladder"
+    tier: "EMERALD"
+    division: "I"
+    count: 200
+  
+  - type: "ladder"
+    tier: "EMERALD"
+    division: "II"
+    count: 200
+  
+  - type: "ladder"
+    tier: "EMERALD"
+    division: "III"
+    count: 200
+  
+  - type: "ladder"
+    tier: "EMERALD"
+    division: "IV"
+    count: 200
+
+  # Platinum Tier - 600 players (300 per division, top 2 divisions only)
+  - type: "ladder"
+    tier: "PLATINUM"
+    division: "I"
+    count: 300
+  
+  - type: "ladder"
+    tier: "PLATINUM"
+    division: "II"
+    count: 300

@@ -1,0 +1,157 @@
+from pathlib import Path
+from unittest.mock import patch
+
+from core.config.settings import get_settings, Settings, _discover_repo_root
+
+
+def test_settings_singleton():
+    """Verify that get_settings returns a Settings instance and is cached."""
+    s1 = get_settings()
+    s2 = get_settings()
+    assert isinstance(s1, Settings)
+    assert s1 is s2
+
+
+def test_discover_repo_root_uses_project_markers(tmp_path: Path):
+    repo_root = tmp_path / "repo"
+    config_dir = repo_root / "core" / "src" / "core" / "config"
+    config_dir.mkdir(parents=True)
+    (repo_root / "config.yml").write_text("backend:\n  port: 8000\n", encoding="utf-8")
+
+    discovered = _discover_repo_root(config_dir / "settings.py")
+
+    assert discovered == repo_root
+
+
+def test_discover_repo_root_falls_back_to_known_layout():
+    with patch("pathlib.Path.exists", return_value=False):
+        discovered = _discover_repo_root(Path("/tmp/no-markers/settings.py"))
+
+    assert discovered == Path(__file__).resolve().parents[2]
+
+
+def test_load_ingest_yaml():
+    """Test loading of ingest.yaml into settings."""
+    yaml_content = """
+    paths:
+      root_dir: "data_test"
+      raw_dir: "raw_test"
+      processed_dir: "processed_test"
+      processed_filename: "matches_test"
+      processed_file_type: "parquet"
+      champion_map_dir: "static_test"
+      champion_map_filename: "champs_test"
+      champion_map_file_type: "json"
+    defaults:
+      region: KR
+    sources:
+      - type: by_rank
+        queue: RANKED_SOLO_5x5
+    """
+
+    # Mock reading the file
+    with (
+        patch("pathlib.Path.exists", return_value=True),
+        patch("pathlib.Path.read_text", return_value=yaml_content),
+    ):
+        # Clear cache to force reload
+        get_settings.cache_clear()
+        settings = get_settings()
+
+        assert settings.ingest.defaults["region"] == "KR"
+        assert len(settings.ingest.sources) == 1
+        assert settings.ingest.sources[0]["type"] == "by_rank"
+        assert settings.ingest.paths.root_dir == "data_test"
+
+        # Test property construction
+        assert settings.processed_file_path.name == "matches_test.parquet"
+        assert settings.champion_map_path.name == "champs_test.json"
+        assert settings.data_root.name == "data_test"
+        assert settings.artifacts_path.name == "draft_model"
+        assert settings.manifests_root.name == "manifests"
+        assert settings.raw_root.name == "raw_test"
+        assert settings.parsed_root.name == "parsed"
+        assert settings.aggregates_root.name == "aggregates"
+
+
+def test_load_ingest_yaml_failure():
+    """Test failure when yaml is missing (should raise ValidationError due to missing required fields)."""
+    from pydantic import ValidationError
+    import pytest
+
+    # Test missing file
+    with patch("pathlib.Path.exists", return_value=False):
+        get_settings.cache_clear()
+        with pytest.raises(ValidationError):
+            get_settings()
+
+
+def test_load_ingest_yaml_exception():
+    """Test failure when yaml parsing raises exception (should raise ValidationError due to missing required fields)."""
+    from pydantic import ValidationError
+    import pytest
+
+    with (
+        patch("pathlib.Path.exists", return_value=True),
+        patch(
+            "core.config.settings.yaml.safe_load", side_effect=Exception("YAML Error")
+        ),
+    ):
+        get_settings.cache_clear()
+        with pytest.raises(ValidationError):
+            get_settings()
+
+
+def test_should_fetch_champion_map():
+    """Test the should_fetch_champion_map property based on defaults."""
+    from core.config.settings import IngestConfig, PathsConfig
+
+    # Mock PathsConfig
+    paths = PathsConfig(
+        root_dir="root",
+        raw_dir="raw",
+        processed_dir="proc",
+        processed_filename="name",
+        processed_file_type="pq",
+        champion_map_dir="map",
+        champion_map_filename="cmap",
+        champion_map_file_type="json",
+    )
+
+    # Case 1: Key missing (should be False by default as per settings.py)
+    config1 = IngestConfig(paths=paths, defaults={})
+    assert config1.should_fetch_champion_map is False
+
+    # Case 2: Explicitly True
+    config2 = IngestConfig(paths=paths, defaults={"fetch_champion_map": True})
+    assert config2.should_fetch_champion_map is True
+
+    # Case 3: Explicitly False
+    config3 = IngestConfig(paths=paths, defaults={"fetch_champion_map": False})
+    assert config3.should_fetch_champion_map is False
+
+
+def test_genai_config_providers():
+    """Test GenAIConfig provider switching logic."""
+    from core.config.settings import GenAIConfig
+
+    # Case 1: Default (Gemini)
+    config = GenAIConfig(
+        provider="gemini",
+        gemini_api_key="gem_key",
+        gemini_model="gem_model",
+        openai_api_key="oa_key",
+        openai_model="oa_model",
+    )
+    assert config.api_key == "gem_key"
+    assert config.model == "gem_model"
+
+    # Case 2: OpenAI
+    config.provider = "openai"
+    assert config.api_key == "oa_key"
+    assert config.model == "oa_model"
+
+    # Case 3: Random/Unknown (should fallback to Gemini logic as per impl)
+    config.provider = "other"
+    assert config.api_key == "gem_key"
+    assert config.model == "gem_model"
