@@ -328,11 +328,11 @@ sketch
 *.swo
 
 # Local data / outputs
-outputs/
+/outputs/
 tmp/
 *.db
 *.sqlite
 
 # Backend Data
-data/
-artifacts/
+/data/
+/artifacts/

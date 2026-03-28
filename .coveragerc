@@ -1,0 +1,6 @@
+[run]
+omit =
+    backend/__init__.py
+    core/__init__.py
+    ingest/__init__.py
+    ml/__init__.py
